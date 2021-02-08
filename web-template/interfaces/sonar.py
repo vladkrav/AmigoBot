@@ -6,18 +6,37 @@ from math import pi as PI
 class SonarData ():
 
     def __init__(self):
-        self.values = []
-        self.minAngle = 0
-        self.maxAngle = 0
+        self.distances = []
         self.minRange = 0
         self.maxRange = 0
         self.timeStamp = 0
     
     def __str__(self):
-        s = "SonarData: {\n   minAngle: " + str(self.minAngle) + "\n maxAngle: " + str(self.maxAngle)
-        s = s + "\n minRange: " + str(self.minRange) + "\n maxRange: " + str(self.maxRange)
-        s = s + "\n timeStamp: " + str(self.timeStamp) + "\n values " + str(self.values) + "\n}"
+        s = "SonarData: {\n minRange: " + str(self.minRange) + "\n maxRange: " + str(self.maxRange)
+        s = s + "\n timeStamp: " + str(self.timeStamp) + "\n distances " + str(self.distances) + "\n}"
         return s
+def SonarScan2SonarData (scan):
+    '''
+        Translates from ROS SonarScan to JderobotTypes SonarData.
+        @param scan: ROS SonarScan to translate
+        @type scan: SonarScan
+        @return a SonarData translated from scan
+    '''
+    sonar = SonarData ()
+    sonar.distances = scan.range
+    ''' 
+          ROS Angle Map      JdeRobot Angle Map
+                0                  PI/2
+                |                   |
+                |                   |
+       PI/2 --------- -PI/2  PI --------- 0
+                |                   |
+                |                   |
+    '''
+    sonar.minRange = scan.min_range
+    sonar.maxRange = scan.max_range
+    sonar.timeStamp = scan.header.stamp.secs + (scan.header.stamp.nsecs *1e-9)
+    return sonar
     
 class ListenerSonar:
     '''
