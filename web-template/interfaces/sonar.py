@@ -24,20 +24,11 @@ def SonarScan2SonarData (scan):
     '''
     sonar = SonarData ()
     sonar.distances = scan.range
-    ''' 
-          ROS Angle Map      JdeRobot Angle Map
-                0                  PI/2
-                |                   |
-                |                   |
-       PI/2 --------- -PI/2  PI --------- 0
-                |                   |
-                |                   |
-    '''
     sonar.minRange = scan.min_range
     sonar.maxRange = scan.max_range
     sonar.timeStamp = scan.header.stamp.secs + (scan.header.stamp.nsecs *1e-9)
     return sonar
-    
+
 class ListenerSonar:
     '''
         ROS Sonar Subsciber. Sonar client to receive sonar scans from ROS Nodes
