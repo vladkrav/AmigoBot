@@ -15,6 +15,7 @@ class SonarData ():
         s = "SonarData: {\n minRange: " + str(self.minRange) + "\n maxRange: " + str(self.maxRange)
         s = s + "\n timeStamp: " + str(self.timeStamp) + "\n distances " + str(self.distances) + "\n}"
         return s
+
 def SonarScan2SonarData (scan):
     '''
         Translates from ROS SonarScan to JderobotTypes SonarData.
