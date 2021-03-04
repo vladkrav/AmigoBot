@@ -11,12 +11,12 @@ from interfaces.sonar import ListenerSonar
 
 # Hardware Abstraction Layer
 class HAL:
-
     
     def __init__(self):
+        
     	rospy.init_node("HAL")
     
-    	self.motors = PublisherMotors("/robot0/cmd_vel", 0.2, 0)
+    	self.motors = PublisherMotors("/robot0/cmd_vel", 0.2, 0.2)
     	self.pose3d = ListenerPose3d("/robot0/odom")
         self.sonar_0 = ListenerSonar("/robot0/sonar_0")
         self.sonar_1 = ListenerSonar("/robot0/sonar_1")
@@ -27,6 +27,7 @@ class HAL:
         self.sonar_6 = ListenerSonar("/robot0/sonar_6")
         self.sonar_7 = ListenerSonar("/robot0/sonar_7")
     	self.laser = ListenerLaser("/robot0/laser_1")
+        self.sonar = [self.sonar_0, self.sonar_1, self.sonar_2, self.sonar_3, self.sonar_4, self.sonar_5, self.sonar_6, self.sonar_7]
     	
     # Explicit initialization functions
     # Class method, so user can call it without instantiation

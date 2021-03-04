@@ -49,7 +49,7 @@ class PublisherMotors:
         self.topic = topic
         self.data = CMDVel()
         self.pub = rospy.Publisher(self.topic, Twist, queue_size=1)
-        
+        #rospy.init_node("AmigoBot")
         self.lock = threading.Lock()
 
         self.kill_event = threading.Event()
@@ -75,8 +75,6 @@ class PublisherMotors:
         self.kill_event.clear()
         self.thread.start()
         
-
-
     def getMaxW(self):
         return self.maxW
 

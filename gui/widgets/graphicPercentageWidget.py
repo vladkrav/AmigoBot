@@ -18,7 +18,7 @@ class PercentageWidget(QWidget):
     def __init__(self,winParent, pose3d):
         super(PercentageWidget, self).__init__()
         self.winParent=winParent
-        self.map = cv2.imread("resources/images/mapgrannyannie.png", cv2.IMREAD_GRAYSCALE)
+        self.map = cv2.imread("resources/images/robocup.png", cv2.IMREAD_GRAYSCALE)
         self.map = cv2.resize(self.map, (500, 500))
         self.pose3d = pose3d
         self.percentageHouse = 0
@@ -110,7 +110,7 @@ class PercentageWidget(QWidget):
         pose = self.winParent.getPose3D().getPose3d()
         x = pose.x
         y = pose.y
-        scale = 50
+        scale = 30
 
         final_poses = self.RTVacuum() * np.matrix([[x], [y], [1], [1]]) * scale
 

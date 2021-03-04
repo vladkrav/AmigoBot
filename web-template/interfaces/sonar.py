@@ -56,23 +56,26 @@ class ListenerSonar:
         self.lock.acquire()
         self.data = sonar
         self.lock.release()
+        
     def stop (self):
         '''
         Stops (Unregisters) the client.
         '''
         self.sub.unregister()
+
     def start(self):
         '''
         Starts (Subscribes) the client.
         '''
         self.sub = rospy.Subscriber(self.topic, Range, self.__callback)
+
     def getSonarData(self):
         '''
         Returns last SonarData
         @return last JdeRobotTypes SonarData saved
         '''
         self.lock.acquire()
-        laser = self.data
+        sonar = self.data
         self.lock.release()
         
-        return laser
+        return sonar

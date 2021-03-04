@@ -10,7 +10,7 @@ function draw(x, y, ax, ay){
 	ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);	
 
 	drawTrail(coords[0], coords[1]);
-	coords = drawTriangle(x, y, ax, ay);
+	coords = drawAmigobot(x, y, ax, ay);
 }
 
 // Function to draw triangle
@@ -24,7 +24,7 @@ function drawCircle(x, y){
 	ctx.arc(x, y, 1.5, 0, 2 * Math.PI);
 	ctx.closePath();
 	
-	ctx.lineWidth = 1.5;
+	ctx.lineWidth = 0.5;//1.5;
 	ctx.strokeStyle = "#0000FF";
 	ctx.stroke();
 	
@@ -34,6 +34,9 @@ function drawCircle(x, y){
 
 // Testing to be carried out with Python interface
 function drawTriangle(posx, posy, angx, angy){	
+	/*Crea un nuevo trazo. Una vez creado, los comandos
+	de dibujo futuros son aplicados dentro del trazo y 
+	usados para construir el nuevo trazo hacia arriba*/
 	ctx.beginPath();
 	
 	px = posx;
@@ -90,4 +93,18 @@ function drawTrail(px, py){
 function clearMap(){
 	ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);
 	trail = [];
+}
+
+function drawAmigobot(posx, posy, angx, angy){
+	var radius = (14/10)*2;
+	ctx.beginPath();
+	px = posx;
+	py = posy;
+	ctx.fillStyle = "#FF0000";
+	ctx.arc(posx, posy, radius, 90*Math.PI/180, 270*Math.PI/180, false);
+	ctx.fillRect(posx, posy - radius, (19/10)*2, (28/10)*2);
+	ctx.fill();
+	rx = px;
+	ry = py;
+	return [rx, ry];
 }

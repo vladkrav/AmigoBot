@@ -41,7 +41,7 @@ class MapWidget(QWidget):
 
 
     def initUI(self):
-        self.map = cv2.imread("resources/images/mapgrannyannie.png", cv2.IMREAD_GRAYSCALE)
+        self.map = cv2.imread("resources/images/robocup.png", cv2.IMREAD_GRAYSCALE)
         self.map = cv2.resize(self.map, (500, 500))
         image = QtGui.QImage(self.map.data, self.map.shape[1], self.map.shape[0], self.map.shape[1], QtGui.QImage.Format_Indexed8);
         self.pixmap = QtGui.QPixmap.fromImage(image)
@@ -58,10 +58,10 @@ class MapWidget(QWidget):
     def setLaserValues(self, laser_data):
         # Init laser array
         if len(self.laser) == 0:
-            for i in range(180):
+            for i in range(400):
                 self.laser.append((0,0))
 
-        for i in range(180):
+        for i in range(400):
             dist = laser_data.values[i]
             angle = -math.pi/2 + math.radians(i)
             self.laser += [(dist, angle)]

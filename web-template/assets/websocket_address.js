@@ -1,1 +1,1 @@
-websocket_address = "127.0.0.1"
+websocket_address = "192.168.1.133"

@@ -33,7 +33,7 @@ class GUI:
         t.start()
         
         # Create the lap object
-        pose3d_object = ListenerPose3d("/roombaROS/odom")
+        pose3d_object = ListenerPose3d("/robot0/odom")
         self.map = Map(pose3d_object)
 
     # Explicit initialization function
@@ -83,12 +83,12 @@ class GUI:
     # Gets called when there is an incoming message from the client
     def get_message(self, client, server, message):
 		# Acknowledge Message for GUI Thread
-		if(message[:4] == "#ack"):
-			self.set_acknowledge(True)
+	    if(message[:4] == "#ack"):
+		    self.set_acknowledge(True)
 			
 		# Message for Console
-		elif(message[:4] == "#con"):
-			self.console.prompt(message)
+	    elif(message[:4] == "#con"):
+		    self.console.prompt(message)
     
     # Activate the server
     def run_server(self):

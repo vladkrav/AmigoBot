@@ -15,22 +15,22 @@ time_cycle = 80
 
 
 class MyAlgorithm(threading.Thread):
+    
+    def __init__(self, pose3d, motors, laser, sonar):
 
-    def __init__(self, pose3d, motors, laser, bumper):
         self.pose3d = pose3d
         self.motors = motors
         self.laser = laser
-        self.bumper = bumper
-
+        self.sonar = sonar
         self.stop_event = threading.Event()
         self.kill_event = threading.Event()
         self.lock = threading.Lock()
         threading.Thread.__init__(self, args=self.stop_event)
-
+        self.start()
 
     def parse_laser_data(self,laser_data):
         laser = []
-        for i in range(180):
+        for i in range(400):
             dist = laser_data.values[i]
             angle = math.radians(i)
             laser += [(dist, angle)]
@@ -44,7 +44,7 @@ class MyAlgorithm(threading.Thread):
             v = (x, y)
             laser_vectorized += [v]
         return laser_vectorized
-
+        
     def run (self):
         while (not self.kill_event.is_set()):
 
@@ -79,7 +79,17 @@ class MyAlgorithm(threading.Thread):
 
         print ('Execute')
         # TODO
-        print self.pose3d.getPose3d().x
-        print self.pose3d.getPose3d().y
-        # Vacuum's yaw
-        yaw = self.pose3d.getPose3d().yaw
+        print ("Posicion X del robot: ", self.pose3d.getPose3d().x)
+        print ("Posicion Y del robot: ", self.pose3d.getPose3d().y)
+        print ("Giro del AmigoBot: ", self.pose3d.getPose3d().yaw)
+        print ("Distancia del sonar_0: ", self.sonar[0].getSonarData().distances)
+        print ("Distancia del sonar_1: ", self.sonar[1].getSonarData().distances)
+        print ("Distancia del sonar_3: ", self.sonar[3].getSonarData().distances)
+        print ("Distancia del sonar_2: ", self.sonar[2].getSonarData().distances)
+        print ("Distancia del sonar_4: ", self.sonar[4].getSonarData().distances)
+        print ("Distancia del sonar_5: ", self.sonar[5].getSonarData().distances)
+        print ("Distancia del sonar_6: ", self.sonar[6].getSonarData().distances)
+        print ("Distancia del sonar_7: ", self.sonar[7].getSonarData().distances)
+        print ("Distancia del laser: ", self.laser.getLaserData().values)
+        self.motors.sendW(0.2)
+        self.motors.sendV(0)
