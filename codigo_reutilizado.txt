@@ -48,3 +48,18 @@ if __name__ == "__main__":
 
 
 *******************************************************************************
+	// px1 = posx + side * Math.cos(3 * Math.PI / 4 + ang - Math.PI / 2 + Math.PI / 2); //4 + 4.24 * cos(135+315) = 4
+	// py1 = posy + side * Math.sin(3 * Math.PI / 4 + ang - Math.PI / 2 + Math.PI / 2); //8 + 4.24 * sin(135+315) = 12.24
+
+	// px2 = posx + side * Math.cos(7 * Math.PI / 4 + ang - Math.PI / 2 + Math.PI / 2); //4 + 4.24 * cos(315+315) = 4
+	// py2 = posy + side * Math.sin(7 * Math.PI / 4 + ang - Math.PI / 2 + Math.PI / 2); //8 + 4.24 * sin(315+315) = 3.76
+
+	// hipotenusa = Math.hypot(side, side); //6
+
+	// px3 = posx + hipotenusa * Math.cos(Math.PI / 2 + ang - Math.PI / 2 + Math.PI / 2); //4 + 6 * cos(90+315) = 8.24
+	// py3 = posy + hipotenusa * Math.sin(Math.PI / 2 + ang - Math.PI / 2 + Math.PI / 2); //8 + 6 * sin(90+315) = 12.24
+
+	// px4 = posx + hipotenusa * Math.cos(ang - Math.PI / 2 + Math.PI / 2); //4 + 6 * cos(315) = 8.24
+	// py4 = posy + hipotenusa * Math.sin(ang - Math.PI / 2 + Math.PI / 2); //8 + 6 * sin(315) = 3.76
+
+	// ctx.arc(posx, posy, side, ang + 3*Math.PI/4 - Math.PI / 2 + Math.PI / 2, ang + 7*Math.PI/4 - Math.PI / 2 + Math.PI / 2, false);

@@ -21,7 +21,7 @@ function drawCircle(x, y){
 	cursor_y = y;
 	
 	ctx.beginPath();
-	ctx.arc(x, y, 1.5, 0, 2 * Math.PI);
+	ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
 	ctx.closePath();
 	
 	ctx.lineWidth = 0.5;//1.5;
@@ -33,7 +33,7 @@ function drawCircle(x, y){
 }
 
 // Testing to be carried out with Python interface
-function drawTriangle(posx, posy, angx, angy){	
+function drawTriangle(posx, posy, angx, angy){
 	/*Crea un nuevo trazo. Una vez creado, los comandos
 	de dibujo futuros son aplicados dentro del trazo y 
 	usados para construir el nuevo trazo hacia arriba*/
@@ -96,15 +96,49 @@ function clearMap(){
 }
 
 function drawAmigobot(posx, posy, angx, angy){
-	var radius = (14/10)*2;
 	ctx.beginPath();
 	px = posx;
 	py = posy;
+	side = 0.8 * Math.hypot(2, 2);
+
+	if(angx != 0){ //Begins with angx = 1 and angy = 1, i.e. 45º or 315º
+		ang = Math.atan2(angy, angx);
+		//alert(`[angle], angle=${ang}, angx=${angx}, angy=${angy}`);
+	}
+	else{
+		ang = Math.PI / 2;
+	}
+	px1 = posx + side * Math.cos(3 * Math.PI / 4 - ang);
+	py1 = posy + side * Math.sin(3 * Math.PI / 4 - ang);
+
+	px2 = posx + side * Math.cos(7 * Math.PI / 4 - ang);
+	py2 = posy + side * Math.sin(7 * Math.PI / 4 - ang);
+
+	hipotenusa = Math.hypot(side, side); //6
+
+	px3 = posx + hipotenusa * Math.cos(Math.PI / 2 - ang);
+	py3 = posy + hipotenusa * Math.sin(Math.PI / 2 - ang);
+
+	px4 = posx + hipotenusa * Math.cos(-ang);
+	py4 = posy + hipotenusa * Math.sin(-ang);
+
+	ctx.arc(posx, posy, side, - ang + 3*Math.PI/4, - ang + 7*Math.PI/4, false);
+	ctx.moveTo(px2, py2);
+	ctx.lineTo(px4, py4);
+	ctx.lineTo(px3, py3);
+	ctx.lineTo(px1, py1);
+	ctx.lineTo(px2, py2);
+
+	ctx.stroke();
 	ctx.fillStyle = "#FF0000";
-	ctx.arc(posx, posy, radius, 90*Math.PI/180, 270*Math.PI/180, false);
-	ctx.fillRect(posx, posy - radius, (19/10)*2, (28/10)*2);
 	ctx.fill();
+	ctx.closePath();
+
 	rx = px;
 	ry = py;
 	return [rx, ry];
+}
+function drawLaser(posx, posy, angx, angy, dataLaser){
+
+
 }
