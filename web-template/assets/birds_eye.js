@@ -114,7 +114,7 @@ function drawAmigobot(posx, posy, angx, angy){
 	px2 = posx + side * Math.cos(7 * Math.PI / 4 - ang);
 	py2 = posy + side * Math.sin(7 * Math.PI / 4 - ang);
 
-	hipotenusa = Math.hypot(side, side); //6
+	hipotenusa = Math.hypot(side, side);
 
 	px3 = posx + hipotenusa * Math.cos(Math.PI / 2 - ang);
 	py3 = posy + hipotenusa * Math.sin(Math.PI / 2 - ang);
