@@ -21,7 +21,7 @@ function declare_gui(websocket_address){
 			alert(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
 		}
 		else{
-			alert("[close] Connection closed!");
+			//alert("[close] Connection closed!");
 		}
 	}
 
@@ -32,15 +32,16 @@ function declare_gui(websocket_address){
 		if(operation == "#gui"){
 			// Parse the entire Object
 			var data = JSON.parse(event.data.substring(4, ));
-
-			// Parse the Map data
-			// Slice off ( and )
 			var pose = data.map.substring(1, data.map.length - 1);
 			var content = pose.split(',').map(function(item) {
 				return parseFloat(item);
 			})
-			draw(content[0], content[1], content[2], content[3]);
-
+			
+			var laser_data = data.laser;
+			var laser_max_range = data.max_range;
+			//alert(`[laser], laser_data=${laser_data}, max_range=${laser_max_range}`);
+			//drawLaser(content[0], content[1], content[2], content[3], laser_data, laser_max_range);
+			draw(content[0], content[1], content[2], content[3], laser_data, laser_max_range);
 			// Parse the Console messages
 			messages = JSON.parse(data.text_buffer);
 			// Loop through the messages and print them on the console

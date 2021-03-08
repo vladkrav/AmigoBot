@@ -6,10 +6,11 @@ var trail = [],
 	coords = [-1, -1];;
 
 // Complete draw function
-function draw(x, y, ax, ay){
+function draw(x, y, ax, ay, laser_data, laser_max_range){
 	ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);	
 
 	drawTrail(coords[0], coords[1]);
+	drawLaser(x, y, ax, ay, laser_data, laser_max_range);
 	coords = drawAmigobot(x, y, ax, ay);
 }
 
@@ -100,7 +101,6 @@ function drawAmigobot(posx, posy, angx, angy){
 	px = posx;
 	py = posy;
 	side = 0.8 * Math.hypot(2, 2);
-
 	if(angx != 0){ //Begins with angx = 1 and angy = 1, i.e. 45º or 315º
 		ang = Math.atan2(angy, angx);
 		//alert(`[angle], angle=${ang}, angx=${angx}, angy=${angy}`);
@@ -138,7 +138,31 @@ function drawAmigobot(posx, posy, angx, angy){
 	ry = py;
 	return [rx, ry];
 }
-function drawLaser(posx, posy, angx, angy, dataLaser){
+function drawLaser(posx, posy, angx, angy, dataLaser, max_range){
+	//alert(`[angle], max_range=${max_range}`);
+	if(angx != 0){ //Begins with angx = 1 and angy = 1, i.e. 45º or 315º
+		ang = Math.atan2(angy, angx);
+	}
+	else{
+		ang = Math.PI / 2;
+	}
 
+	for(let d of dataLaser){
+		if(d[0] > max_range){
+			py = posy - 8*max_range * Math.sin(d[1] + ang + 2*45 * Math.PI/180 + 20*Math.PI/180);
+			px = posx + 8*max_range * Math.cos(d[1] + ang + 2*45 * Math.PI/180 + 20*Math.PI/180);
+		}
+		else{
+			py = posy - 8*d[0] * Math.sin(d[1] + ang + 2*45 * Math.PI/180 + 20*Math.PI/180); //+ 2*45 * Math.PI/180 + 5*Math.PI/180
+			//alert(`[angle], angle=${d[1]}`);
+			px = posx + 8*d[0] * Math.cos(d[1] + ang + 2*45 * Math.PI/180 + 20*Math.PI/180); //+ 2*45 * Math.PI/180 + 5*Math.PI/180
+		}
+		ctx.beginPath();
 
+		ctx.strokeStyle = "#6897BB";
+		ctx.moveTo(posx, posy);
+		ctx.lineTo(px, py);
+		ctx.stroke();
+		ctx.closePath();
+	}
 }

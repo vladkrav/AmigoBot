@@ -8,6 +8,7 @@ from websocket_server import WebsocketServer
 import logging
 
 from interfaces.pose3d import ListenerPose3d
+from interfaces.laser import ListenerLaser
 
 from map import Map
 
@@ -18,7 +19,7 @@ class GUI:
     def __init__(self, host, console, hal):
         t = threading.Thread(target=self.run_server)
         
-        self.payload = {'map': '', 'text_buffer': ''}
+        self.payload = {'map': '', 'text_buffer': '', 'laser':'', 'max_range': ''}
         self.server = None
         self.client = None
         
@@ -34,7 +35,8 @@ class GUI:
         
         # Create the lap object
         pose3d_object = ListenerPose3d("/robot0/odom")
-        self.map = Map(pose3d_object)
+        laser_object = ListenerLaser("/robot0/laser_1")
+        self.map = Map(laser_object, pose3d_object)
 
     # Explicit initialization function
     # Class method, so user can call it without instantiation
@@ -70,7 +72,10 @@ class GUI:
         pos_message = self.map.getRobotCoordinates()
         ang_message = self.map.getRobotAngle()
         pos_message = str(pos_message + ang_message)
-        self.payload["map"] = pos_message   
+        self.payload["map"] = pos_message
+
+        # Payload the Laser data
+        self.payload["laser"], self.payload["max_range"] = self.map.setLaserValues()
 
         # Payload Console Messages
         message_buffer = self.console.get_text_to_be_displayed()

@@ -11,7 +11,7 @@ class LaserData ():
         self.minAngle = 0 # Angle of first value (rads)
         self.maxAngle = 0 # Angle of last value (rads)
         self.minRange = 0 # Max Range posible (meters)
-        self.maxRange = 0 #Min Range posible (meters)
+        self.maxRange = 0 # Min Range posible (meters)
         self.timeStamp = 0 # seconds
 
 
