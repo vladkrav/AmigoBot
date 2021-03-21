@@ -6,12 +6,15 @@ var trail = [],
 	coords = [-1, -1];;
 
 // Complete draw function
-function draw(x, y, ax, ay, laser_data, laser_max_range){
-	ctx.clearRect(0, 0, mapCanvas.width, mapCanvas.height);	
-
+function draw(x, y, ax, ay, laser_data, sonar_point, sonar_sensor_point, pos_vertices, laser_global){
+	mapCanvas.width = 769;
+	mapCanvas.height = 729;
+	
+	clearMap();
 	drawTrail(coords[0], coords[1]);
-	drawLaser(x, y, ax, ay, laser_data, laser_max_range);
+	drawLaser(laser_data, laser_global);
 	coords = drawAmigobot(x, y, ax, ay);
+	drawSonar(sonar_point, sonar_sensor_point, pos_vertices);
 }
 
 // Function to draw triangle
@@ -22,10 +25,10 @@ function drawCircle(x, y){
 	cursor_y = y;
 	
 	ctx.beginPath();
-	ctx.arc(x, y, 0.5, 0, 2 * Math.PI);
+	ctx.arc(x, y, 1.5, 0, 2 * Math.PI);
 	ctx.closePath();
 	
-	ctx.lineWidth = 0.5;//1.5;
+	ctx.lineWidth = 1.5;
 	ctx.strokeStyle = "#0000FF";
 	ctx.stroke();
 	
@@ -45,8 +48,6 @@ function drawTriangle(posx, posy, angx, angy){
 	
 	// The main line
 	ctx.strokeStyle = '#FF0000';
-	//ctx.moveTo(px, py);
-	//ctx.lineTo(px, py);
 	
 	// Sides
 	side = 1.5 * Math.hypot(2, 2);
@@ -67,7 +68,6 @@ function drawTriangle(posx, posy, angx, angy){
 	
 	ctx.moveTo(px3, py3);
 	ctx.lineTo(px1, py1);
-	//ctx.moveTo(px, py);
 	ctx.lineTo(px2, py2);
 	ctx.lineTo(px3, py3);
 	
@@ -100,10 +100,9 @@ function drawAmigobot(posx, posy, angx, angy){
 	ctx.beginPath();
 	px = posx;
 	py = posy;
-	side = 0.8 * Math.hypot(2, 2);
+	side = 1.5 * Math.hypot(2, 2);
 	if(angx != 0){ //Begins with angx = 1 and angy = 1, i.e. 45º or 315º
 		ang = Math.atan2(angy, angx);
-		//alert(`[angle], angle=${ang}, angx=${angx}, angy=${angy}`);
 	}
 	else{
 		ang = Math.PI / 2;
@@ -130,7 +129,7 @@ function drawAmigobot(posx, posy, angx, angy){
 	ctx.lineTo(px2, py2);
 
 	ctx.stroke();
-	ctx.fillStyle = "#FF0000";
+	ctx.fillStyle = "#000000";
 	ctx.fill();
 	ctx.closePath();
 
@@ -138,31 +137,47 @@ function drawAmigobot(posx, posy, angx, angy){
 	ry = py;
 	return [rx, ry];
 }
-function drawLaser(posx, posy, angx, angy, dataLaser, max_range){
-	//alert(`[angle], max_range=${max_range}`);
-	if(angx != 0){ //Begins with angx = 1 and angy = 1, i.e. 45º or 315º
-		ang = Math.atan2(angy, angx);
-	}
-	else{
-		ang = Math.PI / 2;
-	}
-
+function drawLaser(dataLaser, laser_global){
 	for(let d of dataLaser){
-		if(d[0] > max_range){
-			py = posy - 8*max_range * Math.sin(d[1] + ang + 2*45 * Math.PI/180 + 20*Math.PI/180);
-			px = posx + 8*max_range * Math.cos(d[1] + ang + 2*45 * Math.PI/180 + 20*Math.PI/180);
-		}
-		else{
-			py = posy - 8*d[0] * Math.sin(d[1] + ang + 2*45 * Math.PI/180 + 20*Math.PI/180); //+ 2*45 * Math.PI/180 + 5*Math.PI/180
-			//alert(`[angle], angle=${d[1]}`);
-			px = posx + 8*d[0] * Math.cos(d[1] + ang + 2*45 * Math.PI/180 + 20*Math.PI/180); //+ 2*45 * Math.PI/180 + 5*Math.PI/180
-		}
 		ctx.beginPath();
-
-		ctx.strokeStyle = "#6897BB";
-		ctx.moveTo(posx, posy);
-		ctx.lineTo(px, py);
+		ctx.strokeStyle = "#FF2D00";
+		ctx.moveTo(laser_global[0], laser_global[1]);
+		ctx.lineTo(d[0], d[1]);
 		ctx.stroke();
 		ctx.closePath();
+	}
+}
+function drawSonar(sonar_point, sonar_sensor_point, pos_vertices){
+	let px_point = [];
+	let py_point = [];
+	let px_sensor = [];
+	let py_sensor = [];
+	let i = 0;
+	let j = 0;
+	let z = 0;
+
+	for(let d of sonar_point){
+		px_point[i] = d[0];
+		py_point[i] = d[1];
+		i++;
+	}
+	for(let k of sonar_sensor_point){
+		px_sensor[j] = k[0];
+		py_sensor[j] = k[1];
+		j++;	
+	}
+	for(let v of pos_vertices){
+
+		ctx.beginPath();
+		ctx.strokeStyle = "#4AA434";
+		ctx.fillStyle = "#4AA434";
+		ctx.moveTo(px_sensor[z], py_sensor[z]);
+		ctx.lineTo(v[0],v[1]);
+		ctx.lineTo(v[2],v[3]);
+		ctx.lineTo(px_sensor[z], py_sensor[z]);
+		ctx.stroke();
+		ctx.fill();
+		ctx.closePath();
+		z++;
 	}
 }

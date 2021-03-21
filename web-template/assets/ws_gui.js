@@ -38,10 +38,11 @@ function declare_gui(websocket_address){
 			})
 			
 			var laser_data = data.laser;
-			var laser_max_range = data.max_range;
-			//alert(`[laser], laser_data=${laser_data}, max_range=${laser_max_range}`);
-			//drawLaser(content[0], content[1], content[2], content[3], laser_data, laser_max_range);
-			draw(content[0], content[1], content[2], content[3], laser_data, laser_max_range);
+			var sonar_point = data.sonar_point;
+			var sonar_sensor_point = data.sonar_sensor;
+			var pos_vertices = data.pos_vertices;
+			var laser_global = data.laser_global;
+			draw(content[0], content[1], content[2], content[3], laser_data, sonar_point, sonar_sensor_point, pos_vertices, laser_global);
 			// Parse the Console messages
 			messages = JSON.parse(data.text_buffer);
 			// Loop through the messages and print them on the console

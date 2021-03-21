@@ -6,9 +6,9 @@ import time
 from datetime import datetime
 from websocket_server import WebsocketServer
 import logging
-
 from interfaces.pose3d import ListenerPose3d
 from interfaces.laser import ListenerLaser
+from interfaces.sonar import ListenerSonar
 
 from map import Map
 
@@ -19,7 +19,7 @@ class GUI:
     def __init__(self, host, console, hal):
         t = threading.Thread(target=self.run_server)
         
-        self.payload = {'map': '', 'text_buffer': '', 'laser':'', 'max_range': ''}
+        self.payload = {'map': '', 'text_buffer': '', 'laser':'', 'sonar_point': '', 'sonar_sensor':'', 'pos_vertices':'', 'laser_global': ''}
         self.server = None
         self.client = None
         
@@ -34,6 +34,15 @@ class GUI:
         t.start()
         
         # Create the lap object
+        # sonar0_object = ListenerSonar("/robot0/sonar_0")
+        # sonar1_object = ListenerSonar("/robot0/sonar_1")
+        # sonar2_object = ListenerSonar("/robot0/sonar_2")
+        # sonar3_object = ListenerSonar("/robot0/sonar_3")
+        # sonar4_object = ListenerSonar("/robot0/sonar_4")
+        # sonar5_object = ListenerSonar("/robot0/sonar_5")
+        # sonar6_object = ListenerSonar("/robot0/sonar_6")
+        # sonar7_object = ListenerSonar("/robot0/sonar_7")
+
         pose3d_object = ListenerPose3d("/robot0/odom")
         laser_object = ListenerLaser("/robot0/laser_1")
         self.map = Map(laser_object, pose3d_object)
@@ -60,7 +69,7 @@ class GUI:
         
         return acknowledge
         
-    # Function to get value of Acknowledge
+    # Function to set value of Acknowledge
     def set_acknowledge(self, value):
         self.acknowledge_lock.acquire()
         self.acknowledge = value
@@ -73,10 +82,8 @@ class GUI:
         ang_message = self.map.getRobotAngle()
         pos_message = str(pos_message + ang_message)
         self.payload["map"] = pos_message
-
-        # Payload the Laser data
-        self.payload["laser"], self.payload["max_range"] = self.map.setLaserValues()
-
+        # Payload the Sonar and Laser data
+        self.payload["sonar_point"], self.payload["sonar_sensor"], self.payload["pos_vertices"], self.payload["laser"], self.payload["laser_global"] = self.map.global2canvas()
         # Payload Console Messages
         message_buffer = self.console.get_text_to_be_displayed()
         self.payload["text_buffer"] = str(message_buffer)
