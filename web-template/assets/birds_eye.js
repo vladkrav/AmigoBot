@@ -6,7 +6,7 @@ var trail = [],
 	coords = [-1, -1];;
 
 // Complete draw function
-function draw(x, y, ax, ay, laser_data, sonar_point, sonar_sensor_point, pos_vertices, laser_global){
+function draw(x, y, ax, ay, laser_data, sonar_sensor_point, pos_vertices, laser_global){
 	mapCanvas.width = 769;
 	mapCanvas.height = 729;
 	
@@ -14,7 +14,7 @@ function draw(x, y, ax, ay, laser_data, sonar_point, sonar_sensor_point, pos_ver
 	drawTrail(coords[0], coords[1]);
 	drawLaser(laser_data, laser_global);
 	coords = drawAmigobot(x, y, ax, ay);
-	drawSonar(sonar_point, sonar_sensor_point, pos_vertices);
+	drawSonar( sonar_sensor_point, pos_vertices);
 }
 
 // Function to draw triangle
@@ -147,20 +147,18 @@ function drawLaser(dataLaser, laser_global){
 		ctx.closePath();
 	}
 }
-function drawSonar(sonar_point, sonar_sensor_point, pos_vertices){
-	let px_point = [];
-	let py_point = [];
+function drawSonar(sonar_sensor_point, pos_vertices){
 	let px_sensor = [];
 	let py_sensor = [];
 	let i = 0;
 	let j = 0;
 	let z = 0;
 
-	for(let d of sonar_point){
-		px_point[i] = d[0];
-		py_point[i] = d[1];
-		i++;
-	}
+	// for(let d of sonar_point){
+	// 	px_point[i] = d[0];
+	// 	py_point[i] = d[1];
+	// 	i++;
+	// }
 	for(let k of sonar_sensor_point){
 		px_sensor[j] = k[0];
 		py_sensor[j] = k[1];

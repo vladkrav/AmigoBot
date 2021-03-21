@@ -19,7 +19,14 @@ class GUI:
     def __init__(self, host, console, hal):
         t = threading.Thread(target=self.run_server)
         
-        self.payload = {'map': '', 'text_buffer': '', 'laser':'', 'sonar_point': '', 'sonar_sensor':'', 'pos_vertices':'', 'laser_global': ''}
+        self.payload = {
+            'map': '',
+            'text_buffer': '',
+            'laser': '',
+            'sonar_sensor': '',
+            'pos_vertices': '',
+            'laser_global': ''
+            }
         self.server = None
         self.client = None
         
@@ -32,16 +39,6 @@ class GUI:
         self.console = console
         self.hal = hal
         t.start()
-        
-        # Create the lap object
-        # sonar0_object = ListenerSonar("/robot0/sonar_0")
-        # sonar1_object = ListenerSonar("/robot0/sonar_1")
-        # sonar2_object = ListenerSonar("/robot0/sonar_2")
-        # sonar3_object = ListenerSonar("/robot0/sonar_3")
-        # sonar4_object = ListenerSonar("/robot0/sonar_4")
-        # sonar5_object = ListenerSonar("/robot0/sonar_5")
-        # sonar6_object = ListenerSonar("/robot0/sonar_6")
-        # sonar7_object = ListenerSonar("/robot0/sonar_7")
 
         pose3d_object = ListenerPose3d("/robot0/odom")
         laser_object = ListenerLaser("/robot0/laser_1")
@@ -83,7 +80,7 @@ class GUI:
         pos_message = str(pos_message + ang_message)
         self.payload["map"] = pos_message
         # Payload the Sonar and Laser data
-        self.payload["sonar_point"], self.payload["sonar_sensor"], self.payload["pos_vertices"], self.payload["laser"], self.payload["laser_global"] = self.map.global2canvas()
+        self.payload["sonar_sensor"], self.payload["pos_vertices"], self.payload["laser"], self.payload["laser_global"] = self.map.global2canvas()
         # Payload Console Messages
         message_buffer = self.console.get_text_to_be_displayed()
         self.payload["text_buffer"] = str(message_buffer)

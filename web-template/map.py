@@ -18,7 +18,6 @@ class Map:
 		self.sonar_6 = {'pos_x': -0.14, 'pos_y': -0.058, 'orientation': -2.53073}
 		self.sonar_7 = {'pos_x': -0.14, 'pos_y': 0.058, 'orientation': 2.53073}
 		self.laser = {'pos_x': 0.09, 'pos_y': 0.0, 'orientation': 0.0}
-		self.cone = 0.261799
 		self.sonar = [self.sonar_0['orientation'], self.sonar_1['orientation'], self.sonar_2['orientation'], self.sonar_3['orientation'],self.sonar_4['orientation'],self.sonar_5['orientation'],self.sonar_6['orientation'],self.sonar_7['orientation']]
 	
 	def RTx(self, angle, tx, ty, tz):
@@ -66,25 +65,6 @@ class Map:
 	def reset(self):
 		# Nothing to do, service takes care!
 		pass
-	
-	# def setLaserValues(self):
-	# 	# Init laser array
-	# 	laser = []
-	# 	#self.laser = self.laser_topic.getLaserData()
-
-	# 	if(self.laser):
-	# 		#angle = int(round(math.degrees(self.laser.maxAngle)))
-	# 		angle = int(round(math.degrees(2*math.pi)))
-	# 	for i in range(angle):
-	# 		laser.append((0,0))
-	# 	if(self.laser):
-	# 		for i in range(angle):
-	# 			dist = self.laser.values[i]
-	# 			angle = math.radians(i)
-	# 			if(dist == float("inf")):
-	# 				dist = self.laser.maxRange
-	# 			laser[i] = (dist, angle)
-	# 	return laser, self.laser.maxRange
 
 	def transformfun(self, posx, posy, orientation, distance):
 		'''
@@ -123,8 +103,8 @@ class Map:
 		yaw = pose.yaw
 		x = pose.x
 		y = pose.y
-		points_global, point_global_sensor, pos_vertices, laser_points_global, laser_global = self.relative2global(x, y, yaw)
-		pos_global_point = []
+		point_global_sensor, pos_vertices, laser_points_global, laser_global = self.relative2global(x, y, yaw)
+		#pos_global_point = []
 		pos_global_sensor = []
 		pos_global_vertices = []
 		pos_global_laser = []
@@ -132,14 +112,6 @@ class Map:
 
 		scale_y = 33.25; offset_y = 0.33
 		scale_x = 33.25; offset_x = 0.33
-		for i in range(8):
-			pos_global_point.append((0,0))
-			key = 'sonar_' + str(i)
-			p_x = points_global[key][0]
-			p_y = points_global[key][1]
-			x = scale_x * p_x + offset_x
-			y = 729 - (scale_y * p_y + offset_y)
-			pos_global_point[i] = (x, y)
 
 		for i in range(8):
 			pos_global_sensor.append((0,0))
@@ -179,7 +151,7 @@ class Map:
 			p_y_2 = 729 - (scale_y * p_y_2 + offset_y)
 			pos_global_vertices[i] = (p_x_1, p_y_1, p_x_2, p_y_2)
 
-		return pos_global_point, pos_global_sensor, pos_global_vertices, pos_global_laser_points, pos_global_laser
+		return pos_global_sensor, pos_global_vertices, pos_global_laser_points, pos_global_laser
 
 	def transformfun(self, posx, posy, orientation, distance):
 		'''
@@ -195,8 +167,8 @@ class Map:
 		cone = 0.261799
 		pos_vertices = []
 
-		xr = posx + math.cos(orientation)*distance
-		yr = posy + math.sin(orientation)*distance
+		# xr = posx + math.cos(orientation)*distance
+		# yr = posy + math.sin(orientation)*distance
 
 		# Calculating the vertices of the triangle
 		hipotenusa = distance/(math.cos(cone/2))
@@ -212,7 +184,7 @@ class Map:
 			y_2 = posy + math.sin(orientation - cone/2)*hipotenusa		
 		pos_vertices = [x_1, y_1, x_2, y_2]
 
-		return xr, yr, pos_vertices
+		return pos_vertices
 
 	def robotBaseline(self):
 		'''
@@ -220,15 +192,28 @@ class Map:
 		'''	
 		laser_points = []
 		laser = self.hal.laser.getLaserData()
-		xr_0, yr_0, pos_vertices_0 = self.transformfun(self.sonar_0['pos_x'], self.sonar_0['pos_y'], self.sonar_0['orientation'], self.hal.sonar_0.getSonarData().distances)
-		xr_1, yr_1, pos_vertices_1 = self.transformfun(self.sonar_1['pos_x'], self.sonar_1['pos_y'], self.sonar_1['orientation'], self.hal.sonar_1.getSonarData().distances)
-		xr_2, yr_2, pos_vertices_2 = self.transformfun(self.sonar_2['pos_x'], self.sonar_2['pos_y'], self.sonar_2['orientation'], self.hal.sonar_2.getSonarData().distances)
-		xr_3, yr_3, pos_vertices_3 = self.transformfun(self.sonar_3['pos_x'], self.sonar_3['pos_y'], self.sonar_3['orientation'], self.hal.sonar_3.getSonarData().distances)
-		xr_4, yr_4, pos_vertices_4 = self.transformfun(self.sonar_4['pos_x'], self.sonar_4['pos_y'], self.sonar_4['orientation'], self.hal.sonar_4.getSonarData().distances)
-		xr_5, yr_5, pos_vertices_5 = self.transformfun(self.sonar_5['pos_x'], self.sonar_5['pos_y'], self.sonar_5['orientation'], self.hal.sonar_5.getSonarData().distances)
-		xr_6, yr_6, pos_vertices_6 = self.transformfun(self.sonar_6['pos_x'], self.sonar_6['pos_y'], self.sonar_6['orientation'], self.hal.sonar_6.getSonarData().distances)
-		xr_7, yr_7, pos_vertices_7 = self.transformfun(self.sonar_7['pos_x'], self.sonar_7['pos_y'], self.sonar_7['orientation'], self.hal.sonar_7.getSonarData().distances)
 		
+		# Getting the position of the vertices of the sonar triangle in the robot baseline
+		pos_vertices_0 = self.transformfun(self.sonar_0['pos_x'], self.sonar_0['pos_y'], self.sonar_0['orientation'], self.hal.sonar_0.getSonarData().distances)
+		pos_vertices_1 = self.transformfun(self.sonar_1['pos_x'], self.sonar_1['pos_y'], self.sonar_1['orientation'], self.hal.sonar_1.getSonarData().distances)
+		pos_vertices_2 = self.transformfun(self.sonar_2['pos_x'], self.sonar_2['pos_y'], self.sonar_2['orientation'], self.hal.sonar_2.getSonarData().distances)
+		pos_vertices_3 = self.transformfun(self.sonar_3['pos_x'], self.sonar_3['pos_y'], self.sonar_3['orientation'], self.hal.sonar_3.getSonarData().distances)
+		pos_vertices_4 = self.transformfun(self.sonar_4['pos_x'], self.sonar_4['pos_y'], self.sonar_4['orientation'], self.hal.sonar_4.getSonarData().distances)
+		pos_vertices_5 = self.transformfun(self.sonar_5['pos_x'], self.sonar_5['pos_y'], self.sonar_5['orientation'], self.hal.sonar_5.getSonarData().distances)
+		pos_vertices_6 = self.transformfun(self.sonar_6['pos_x'], self.sonar_6['pos_y'], self.sonar_6['orientation'], self.hal.sonar_6.getSonarData().distances)
+		pos_vertices_7 = self.transformfun(self.sonar_7['pos_x'], self.sonar_7['pos_y'], self.sonar_7['orientation'], self.hal.sonar_7.getSonarData().distances)
+		
+		pos_vertices = {
+			'sonar_0': pos_vertices_0, 
+			'sonar_1': pos_vertices_1, 
+			'sonar_2': pos_vertices_2, 
+			'sonar_3': pos_vertices_3, 
+			'sonar_4': pos_vertices_4, 
+			'sonar_5': pos_vertices_5, 
+			'sonar_6': pos_vertices_6, 
+			'sonar_7': pos_vertices_7
+		}
+
 		for i in range(0,400):
 			laser_points.append((0,0))
 			if(i == 0):
@@ -241,36 +226,16 @@ class Map:
 			xr = self.laser['pos_x'] + math.cos(angle)*dist
 			yr = self.laser['pos_y'] + math.sin(angle)*dist
 			laser_points[i] = (xr, yr)
-
-		points_pos = {'sonar_0': [xr_0, yr_0], 'sonar_1': [xr_1, yr_1], 'sonar_2': [xr_2, yr_2], 'sonar_3': [xr_3, yr_3], 'sonar_4': [xr_4, yr_4], 'sonar_5': [xr_5, yr_5], 'sonar_6': [xr_6, yr_6], 'sonar_7': [xr_7, yr_7]}
-		pos_vertices = {'sonar_0': pos_vertices_0, 'sonar_1': pos_vertices_1, 'sonar_2': pos_vertices_2, 'sonar_3': pos_vertices_3, 'sonar_4': pos_vertices_4, 'sonar_5': pos_vertices_5, 'sonar_6': pos_vertices_6, 'sonar_7': pos_vertices_7}
 		
-		return points_pos, pos_vertices, laser_points
+		return pos_vertices, laser_points
 
 	def relative2global(self, posx, posy, yaw):
 
-		points_pos, pos_vertices, laser_points = self.robotBaseline()
+		pos_vertices, laser_points = self.robotBaseline()
+
 		pos_vertices_global = []
 		laser_points_global = []
-		# Global position of the points measured by the sonar
-		xg_0 = posx + math.cos(yaw)*points_pos['sonar_0'][0] - math.sin(yaw)*points_pos['sonar_0'][1]
-		yg_0 = posy + math.sin(yaw)*points_pos['sonar_0'][0] + math.cos(yaw)*points_pos['sonar_0'][1]
-		xg_1 = posx + math.cos(yaw)*points_pos['sonar_1'][0] - math.sin(yaw)*points_pos['sonar_1'][1]
-		yg_1 = posy + math.sin(yaw)*points_pos['sonar_1'][0] + math.cos(yaw)*points_pos['sonar_1'][1]
-		xg_2 = posx + math.cos(yaw)*points_pos['sonar_2'][0] - math.sin(yaw)*points_pos['sonar_2'][1]
-		yg_2 = posy + math.sin(yaw)*points_pos['sonar_2'][0] + math.cos(yaw)*points_pos['sonar_2'][1]
-		xg_3 = posx + math.cos(yaw)*points_pos['sonar_3'][0] - math.sin(yaw)*points_pos['sonar_3'][1]
-		yg_3 = posy + math.sin(yaw)*points_pos['sonar_3'][0] + math.cos(yaw)*points_pos['sonar_3'][1]
-		xg_4 = posx + math.cos(yaw)*points_pos['sonar_4'][0] - math.sin(yaw)*points_pos['sonar_4'][1]
-		yg_4 = posy + math.sin(yaw)*points_pos['sonar_4'][0] + math.cos(yaw)*points_pos['sonar_4'][1]
-		xg_5 = posx + math.cos(yaw)*points_pos['sonar_5'][0] - math.sin(yaw)*points_pos['sonar_5'][1]
-		yg_5 = posy + math.sin(yaw)*points_pos['sonar_5'][0] + math.cos(yaw)*points_pos['sonar_5'][1]
-		xg_6 = posx + math.cos(yaw)*points_pos['sonar_6'][0] - math.sin(yaw)*points_pos['sonar_6'][1]
-		yg_6 = posy + math.sin(yaw)*points_pos['sonar_6'][0] + math.cos(yaw)*points_pos['sonar_6'][1]
-		xg_7 = posx + math.cos(yaw)*points_pos['sonar_7'][0] - math.sin(yaw)*points_pos['sonar_7'][1]
-		yg_7 = posy + math.sin(yaw)*points_pos['sonar_7'][0] + math.cos(yaw)*points_pos['sonar_7'][1]
 
-		points_global = {'sonar_0': [xg_0, yg_0], 'sonar_1': [xg_1, yg_1], 'sonar_2': [xg_2, yg_2], 'sonar_3': [xg_3, yg_3], 'sonar_4': [xg_4, yg_4], 'sonar_5': [xg_5, yg_5], 'sonar_6': [xg_6, yg_6], 'sonar_7': [xg_7, yg_7]}
 		# Calculating the position of the sensor in the global baseline.
 		xsg_0 = posx + math.cos(yaw)*self.sonar_0['pos_x'] - math.sin(yaw)*self.sonar_0['pos_y']
 		ysg_0 = posy + math.sin(yaw)*self.sonar_0['pos_x'] + math.cos(yaw)*self.sonar_0['pos_y']
@@ -289,7 +254,16 @@ class Map:
 		xsg_7 = posx + math.cos(yaw)*self.sonar_7['pos_x'] - math.sin(yaw)*self.sonar_7['pos_y']
 		ysg_7 = posy + math.sin(yaw)*self.sonar_7['pos_x'] + math.cos(yaw)*self.sonar_7['pos_y']
 
-		points_global_sensor = {'sonar_0': [xsg_0, ysg_0], 'sonar_1': [xsg_1, ysg_1], 'sonar_2': [xsg_2, ysg_2], 'sonar_3': [xsg_3, ysg_3], 'sonar_4': [xsg_4, ysg_4], 'sonar_5': [xsg_5, ysg_5], 'sonar_6': [xsg_6, ysg_6], 'sonar_7': [xsg_7, ysg_7]}
+		points_global_sensor = {
+			'sonar_0': [xsg_0, ysg_0], 
+			'sonar_1': [xsg_1, ysg_1], 
+			'sonar_2': [xsg_2, ysg_2], 
+			'sonar_3': [xsg_3, ysg_3], 
+			'sonar_4': [xsg_4, ysg_4], 
+			'sonar_5': [xsg_5, ysg_5], 
+			'sonar_6': [xsg_6, ysg_6], 
+			'sonar_7': [xsg_7, ysg_7]
+		}
 		
 		for i in range(8):
 			pos_vertices_global.append((0,0,0,0))
@@ -300,7 +274,16 @@ class Map:
 			yv_2 = posy + math.sin(yaw)*pos_vertices[key][2] + math.cos(yaw)*pos_vertices[key][3]
 			pos_vertices_global[i] = (xv_1, yv_1, xv_2, yv_2)
 	
-		global_vertices = {'sonar_0': pos_vertices_global[0], 'sonar_1': pos_vertices_global[1], 'sonar_2': pos_vertices_global[2], 'sonar_3': pos_vertices_global[3], 'sonar_4': pos_vertices_global[4], 'sonar_5': pos_vertices_global[5], 'sonar_6': pos_vertices_global[6], 'sonar_7': pos_vertices_global[7]}
+		global_vertices = {
+			'sonar_0': pos_vertices_global[0], 
+			'sonar_1': pos_vertices_global[1], 
+			'sonar_2': pos_vertices_global[2], 
+			'sonar_3': pos_vertices_global[3], 
+			'sonar_4': pos_vertices_global[4], 
+			'sonar_5': pos_vertices_global[5], 
+			'sonar_6': pos_vertices_global[6], 
+			'sonar_7': pos_vertices_global[7]
+		}
 		
 		# Global position of the measured points by laser
 		for i in range(0,400):
@@ -314,7 +297,17 @@ class Map:
 		yg_laser = posy + math.sin(yaw)*self.laser['pos_x'] + math.cos(yaw)*self.laser['pos_y']
 		laser_global = (xg_laser, yg_laser)
 
-		return points_global, points_global_sensor, global_vertices, laser_points_global, laser_global
+		return points_global_sensor, global_vertices, laser_points_global, laser_global
+	
+	# def setAmigobotValues(self):
+	# 	pose = self.pose3d.getPose3d()
+	# 	yaw = pose.yaw
+	# 	x = pose.x
+	# 	y = pose.y
+	# 	local2relative()
+	# 	relative2global(x, y, yaw)
+
+	# 	return coord_bot
 
 	
 
