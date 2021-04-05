@@ -16,7 +16,6 @@ class SonarData ():
         s = s + "\n timeStamp: " + str(self.timeStamp) + "\n distances " + str(self.distances) + "\n}"
         return s
 
-
 def SonarScan2SonarData (scan):
     '''
         Translates from ROS SonarScan to JderobotTypes SonarData.
@@ -46,6 +45,7 @@ class ListenerSonar:
         self.sub = None
         self.lock = threading.Lock()
         self.start()
+        
     def __callback (self, scan):
         '''
             Callback function to receive and save Sonar Scans

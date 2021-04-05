@@ -16,7 +16,7 @@ class HAL:
         
     	rospy.init_node("HAL")
     
-    	self.motors = PublisherMotors("/robot0/cmd_vel", 0.2, 0.2)
+    	self.motors = PublisherMotors("/robot0/cmd_vel", 0.75, 0.75)
     	self.pose3d = ListenerPose3d("/robot0/odom")
         self.sonar_0 = ListenerSonar("/robot0/sonar_0")
         self.sonar_1 = ListenerSonar("/robot0/sonar_1")

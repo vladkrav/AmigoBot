@@ -1,5 +1,4 @@
 import json
-import cv2
 import base64
 import threading
 import time
@@ -19,8 +18,17 @@ class GUI:
     def __init__(self, host, console, hal):
         t = threading.Thread(target=self.run_server)
         
+        # self.payload = {
+        #     'map': '',
+        #     'text_buffer': '',
+        #     'laser': '',
+        #     'sonar_sensor': '',
+        #     'pos_vertices': '',
+        #     'laser_global': ''
+        #     }
         self.payload = {
-            'map': '',
+            'robot_coord': '',
+            'robot_contorno': '',
             'text_buffer': '',
             'laser': '',
             'sonar_sensor': '',
@@ -75,12 +83,15 @@ class GUI:
     # Update the gui
     def update_gui(self):
         # Payload Map Message
-        pos_message = self.map.getRobotCoordinates()
-        ang_message = self.map.getRobotAngle()
-        pos_message = str(pos_message + ang_message)
-        self.payload["map"] = pos_message
+        # pos_message = self.map.getRobotCoordinates()
+        # ang_message = self.map.getRobotAngle()
+        # pos_message = str(pos_message + ang_message)
+        # self.payload["map"] = pos_message
+        self.payload["robot_coord"], self.payload["robot_contorno"] = self.map.setRobotValues()
         # Payload the Sonar and Laser data
-        self.payload["sonar_sensor"], self.payload["pos_vertices"], self.payload["laser"], self.payload["laser_global"] = self.map.global2canvas()
+        self.payload["pos_vertices"], self.payload["sonar_sensor"] = self.map.setSonarValues()
+        self.payload["laser"], self.payload["laser_global"] = self.map.setLaserValues()
+        # self.payload["sonar_sensor"], self.payload["pos_vertices"], self.payload["laser"], self.payload["laser_global"] = self.map.global2canvas()
         # Payload Console Messages
         message_buffer = self.console.get_text_to_be_displayed()
         self.payload["text_buffer"] = str(message_buffer)

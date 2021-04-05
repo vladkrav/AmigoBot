@@ -27,22 +27,25 @@ function declare_gui(websocket_address){
 
 	// What to do when a message from server is received
 	websocket_gui.onmessage = function(event){
-		var operation = event.data.substring(0, 4);
+		/*Extrae caracteres desde un indiceA hasta un indiceB sin incluirlo */
+		var operation = event.data.substring(0, 4); /*Devuelve un subconunto de un objeto String*/
 		
 		if(operation == "#gui"){
 			// Parse the entire Object
+			/*Analiza una cadena de texto como JSON, transformando opcionalmente el valor producido por el analisis */
 			var data = JSON.parse(event.data.substring(4, ));
-			var pose = data.map.substring(1, data.map.length - 1);
-			var content = pose.split(',').map(function(item) {
-				return parseFloat(item);
-			})
-			
+			// var pose = data.map.substring(1, data.map.length - 1);
+			// var content = pose.split(',').map(function(item) {
+			// 	return parseFloat(item);
+			// })
+			var robot_coord = data.robot_coord;
+			var robot_cont = data.robot_contorno;
 			var laser_data = data.laser;
-			//var sonar_point = data.sonar_point;
+			var laser_global = data.laser_global;
 			var sonar_sensor_point = data.sonar_sensor;
 			var pos_vertices = data.pos_vertices;
-			var laser_global = data.laser_global;
-			draw(content[0], content[1], content[2], content[3], laser_data, sonar_sensor_point, pos_vertices, laser_global);
+			/*Draw all*/
+			draw(robot_coord, robot_cont, laser_data, sonar_sensor_point, pos_vertices, laser_global);
 			// Parse the Console messages
 			messages = JSON.parse(data.text_buffer);
 			// Loop through the messages and print them on the console
