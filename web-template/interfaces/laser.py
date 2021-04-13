@@ -13,12 +13,14 @@ class LaserData ():
         self.minRange = 0 # Max Range posible (meters)
         self.maxRange = 0 # Min Range posible (meters)
         self.timeStamp = 0 # seconds
+        self.angleIncrement = 0 # Increment of angle
 
 
     def __str__(self):
         s = "LaserData: {\n   minAngle: " + str(self.minAngle) + "\n   maxAngle: " + str(self.maxAngle)
         s = s + "\n   minRange: " + str(self.minRange) + "\n   maxRange: " + str(self.maxRange) 
-        s = s + "\n   timeStamp: " + str(self.timeStamp) + "\n   values: " + str(self.values) + "\n}"
+        s = s + "\n   timeStamp: " + str(self.timeStamp) + "\n   values: " + str(self.values) + "\n"
+        s = s + "\n   angleIncrement: " + str(self.angleIncrement) + "\n}"
         return s 
 
 def laserScan2LaserData(scan):
@@ -48,6 +50,7 @@ def laserScan2LaserData(scan):
     laser.maxRange = scan.range_max
     laser.minRange = scan.range_min
     laser.timeStamp = scan.header.stamp.secs + (scan.header.stamp.nsecs *1e-9)
+    laser.angleIncrement = scan.angle_increment
     return laser
 
 class ListenerLaser:

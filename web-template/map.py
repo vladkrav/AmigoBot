@@ -1,23 +1,18 @@
 import numpy as np
 import math
+from parse_configuration import Config
 from math import pi as pi
 from hal import HAL
+
+flag = 0
+
 class Map:
 	def __init__(self,laser_object, pose3d):
-		self.pose3d = pose3d
-		self.payload = {}
+		self.config = Config()
 		self.hal = HAL()
+		self.pose3d = pose3d
 		self.laser_topic = laser_object
-		self.sonar_0 = {'pos_x': 0.076, 'pos_y': 0.1, 'orientation': 1.5708}
-		self.sonar_1 = {'pos_x': 0.125, 'pos_y': 0.075, 'orientation': 0.715585}
-		self.sonar_2 = {'pos_x': 0.15, 'pos_y': 0.03, 'orientation': 0.261799}
-		self.sonar_3 = {'pos_x': 0.15, 'pos_y': -0.03, 'orientation': -0.261799}
-		self.sonar_4 = {'pos_x': 0.125, 'pos_y': -0.075, 'orientation': -0.715585}
-		self.sonar_5 = {'pos_x': 0.076, 'pos_y': -0.1, 'orientation': -1.5708}
-		self.sonar_6 = {'pos_x': -0.14, 'pos_y': -0.058, 'orientation': -2.53073}
-		self.sonar_7 = {'pos_x': -0.14, 'pos_y': 0.058, 'orientation': 2.53073}
-		self.laser = {'pos_x': 0.09, 'pos_y': 0.0, 'orientation': 0.0}
-	
+
 	def RTx(self, angle, tx, ty, tz):
 		RT = np.matrix([[1, 0, 0, tx], [0, math.cos(angle), -math.sin(angle), ty], 
 						[0, math.sin(angle), math.cos(angle), tz], [0, 0, 0, 1]])
@@ -65,11 +60,19 @@ class Map:
 		pass
 	
 	def setRobotValues(self):
+		global flag
 		pose = self.pose3d.getPose3d()
 		yaw = pose.yaw
 		x = pose.x
 		y = pose.y
-		z = 0
+		if(flag == 0):
+			self.initial_x = self.pose3d.getPose3d().x
+			self.initial_y = self.pose3d.getPose3d().y
+			self.initial_yaw = self.pose3d.getPose3d().yaw
+			flag = 1
+		x_desired = self.config.pos_x
+		y_desired = self.config.pos_y
+		yaw_desired = self.config.orientation
 		radius = 0.15
 		base = radius/2
 		coord_contorno = []
@@ -77,49 +80,50 @@ class Map:
 		# Vertice 1
 		alfa = math.asin((base)/radius)
 		xr, yr = self.local2relative(0, 0, radius, math.pi - alfa)
-		xg, yg = self.relative2global(x, y, xr, yr, yaw)
+		xg, yg = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), xr, yr, yaw_desired + (yaw - self.initial_yaw))
 		xc, yc = self.global2canvas(xg, yg)
 		coord_contorno.append((0,0))
 		coord_contorno [0] = (xc, yc)
 	 	# Vertice 2
 		xr, yr = self.local2relative(0, 0, radius, math.pi + alfa)
-		xg, yg = self.relative2global(x, y, xr, yr, yaw)
+		xg, yg = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), xr, yr, yaw_desired + (yaw - self.initial_yaw))
 		xc, yc = self.global2canvas(xg, yg)
 		coord_contorno.append((0,0))
 		coord_contorno [1] = (xc, yc)
 		# Vertice 3
 		xr, yr = self.local2relative(0, 0, radius, 0)
-		xg, yg = self.relative2global(x, y, xr, yr, yaw)
-		xc, yc = self.global2canvas(xg, yg)
+		xg, yg = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), xr, yr, yaw_desired + (yaw - self.initial_yaw))
+		xc, yc = self.global2canvas(xg,yg)
 		coord_contorno.append((0,0))
 		coord_contorno [2] = (xc, yc)
 
 	 	# Position of the robot in the canvas
-		xc, yc = self.global2canvas(x, y)
+		xc, yc = self.global2canvas(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y))
 		coord_robot.append((0,0))
 		coord_robot = (xc, yc)
 		return coord_robot, coord_contorno
 	
 	def setSonarValues(self):
+		# Init array
 		self.sonares = []
 		self.dist = []
-		# Configuration of the sonar x, y (in metres) and orientation (in radians)
+		# Sonar disposition
 		self.sonares.append((0,0,0))
-		self.sonares[0] = (0.076, 0.1, 1.5708)
+		self.sonares[0] = (self.config.sonar_0['POS_X'], self.config.sonar_0['POS_Y'], self.config.sonar_0['ORIENTATION'])
 		self.sonares.append((0,0,0))
-		self.sonares[1] = (0.125, 0.075, 0.715585)
+		self.sonares[1] = (self.config.sonar_1['POS_X'], self.config.sonar_1['POS_Y'], self.config.sonar_1['ORIENTATION'])
 		self.sonares.append((0,0,0))
-		self.sonares[2] = (0.15, 0.03, 0.261799)
+		self.sonares[2] = (self.config.sonar_2['POS_X'], self.config.sonar_2['POS_Y'], self.config.sonar_2['ORIENTATION'])
 		self.sonares.append((0,0,0))
-		self.sonares[3] = (0.15, -0.03, -0.261799)
+		self.sonares[3] = (self.config.sonar_3['POS_X'], self.config.sonar_3['POS_Y'], self.config.sonar_3['ORIENTATION'])
 		self.sonares.append((0,0,0))
-		self.sonares[4] = (0.125, -0.075, -0.715585)
+		self.sonares[4] = (self.config.sonar_4['POS_X'], self.config.sonar_4['POS_Y'], self.config.sonar_4['ORIENTATION'])
 		self.sonares.append((0,0,0))
-		self.sonares[5] = (0.076, -0.1, -1.5708)
+		self.sonares[5] = (self.config.sonar_5['POS_X'], self.config.sonar_5['POS_Y'], self.config.sonar_5['ORIENTATION'])
 		self.sonares.append((0,0,0))
-		self.sonares[6] = (-0.14, -0.058, -2.53073)
+		self.sonares[6] = (self.config.sonar_6['POS_X'], self.config.sonar_6['POS_Y'], self.config.sonar_6['ORIENTATION'])
 		self.sonares.append((0,0,0))
-		self.sonares[7] = (-0.14, 0.058, 2.53073)
+		self.sonares[7] = (self.config.sonar_7['POS_X'], self.config.sonar_7['POS_Y'], self.config.sonar_7['ORIENTATION'])
 		# SONAR 0
 		self.dist.append(0)
 		self.dist[0] = self.hal.sonar_0.getSonarData().distances
@@ -178,6 +182,9 @@ class Map:
 			self.dist[7] = self.hal.sonar_0.getSonarData().minRange
 
 		pose = self.pose3d.getPose3d()
+		x_desired = self.config.pos_x
+		y_desired = self.config.pos_y
+		yaw_desired = self.config.orientation
 		yaw = pose.yaw
 		x = pose.x
 		y = pose.y
@@ -199,15 +206,15 @@ class Map:
 				xr_1, yr_1 = self.local2relative(self.sonares[i][0], self.sonares[i][1], hipotenusa, orientation)
 				orientation = self.sonares[i][2] - cone/2
 				xr_2, yr_2 = self.local2relative(self.sonares[i][0], self.sonares[i][1], hipotenusa, orientation)	
-			xg_1, yg_1 = self.relative2global(x, y, xr_1, yr_1, yaw)
-			xg_2, yg_2 = self.relative2global(x, y, xr_2, yr_2, yaw)
+			xg_1, yg_1 = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), xr_1, yr_1, yaw_desired + (yaw - self.initial_yaw))
+			xg_2, yg_2 = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), xr_2, yr_2, yaw_desired + (yaw - self.initial_yaw))
 			xc_1, yc_1 = self.global2canvas(xg_1, yg_1)
 			xc_2, yc_2 = self.global2canvas(xg_2, yg_2)
 			vertices[i] = (xc_1, yc_1, xc_2, yc_2)
 		# Se definen las posiciones de los sensores sonar
 		for i in range(0,8):
 			sonar_sensor.append((0,0))
-			xg, yg = self.relative2global(x, y, self.sonares[i][0], self.sonares[i][1], yaw)
+			xg, yg = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), self.sonares[i][0], self.sonares[i][1], yaw_desired + (yaw - self.initial_yaw))
 			xc, yc = self.global2canvas(xg, yg)
 			sonar_sensor[i] = (xc, yc)
 		return vertices, sonar_sensor
@@ -217,12 +224,20 @@ class Map:
 		yaw = pose.yaw
 		x = pose.x
 		y = pose.y
-		xg, yg = self.relative2global(x, y, self.laser['pos_x'], self.laser['pos_y'], yaw)
+		x_desired = self.config.pos_x
+		y_desired = self.config.pos_y
+		yaw_desired = self.config.orientation
+		xg, yg = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), self.config.laser['POS_X'], self.config.laser['POS_Y'], yaw_desired + (yaw - self.initial_yaw))
 		xc, yc = self.global2canvas(xg, yg)
 		laser_sensor = [xc, yc]
 		laser = self.hal.laser.getLaserData()
+		angle_min = laser.minAngle
+		angle_max = laser.maxAngle
+		angle_increment = laser.angleIncrement
+		rays = np.arange(angle_min, angle_max + angle_increment, angle_increment)
+		cont_rays = len(rays)
 		laser_beam = []
-		for i in range(0,400):
+		for i in range(0,cont_rays-1):
 			laser_beam.append((0,0))
 			if(i == 0):
 				angle = -math.pi
@@ -231,8 +246,8 @@ class Map:
 			dist = laser.values[i]
 			if(dist == float("inf")):
 				dist = laser.maxRange
-			xr, yr = self.local2relative(self.laser['pos_x'], self.laser['pos_y'], dist, angle)
-			xg, yg = self.relative2global(x, y, xr, yr, yaw)
+			xr, yr = self.local2relative(self.config.laser['POS_X'], self.config.laser['POS_Y'], dist, angle)
+			xg, yg = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), xr, yr, yaw_desired + (yaw - self.initial_yaw))
 			xc, yc = self.global2canvas(xg, yg)
 			laser_beam[i] = (xc, yc)
 		return laser_beam, laser_sensor
