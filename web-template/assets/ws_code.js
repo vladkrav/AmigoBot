@@ -15,6 +15,7 @@ var frequency = "0",
 
 //WebSocket for Code
 var websocket_code;
+var teleop_switch = false;
 function declare_code(websocket_address){
 	websocket_code = new WebSocket("ws://" + websocket_address + ":1905/");
 
@@ -29,7 +30,6 @@ function declare_code(websocket_address){
 			alert("[close] Connection closed!");
 		}
 	}
-
 	websocket_code.onmessage = function(event){
 		var source_code = event.data;
 		operation = source_code.substring(0, 5);
@@ -118,4 +118,17 @@ function codefrequencyUpdate(vol) {
 // Function for range slider
 function guifrequencyUpdate(vol) {
 	document.querySelector('#gui_frequency').value = vol;
+}
+function Teleoperation(){
+	var message = "#teop"
+	teleop_switch = !teleop_switch;
+	websocket_code.send(message)
+}
+function keyEvent(event){
+	var message = "#key";
+	var key = event.key;
+	message = message + key;
+	websocket_code.send(message);
+
+
 }

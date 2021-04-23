@@ -43,7 +43,40 @@ class Template:
         self.console = console.Console()
         self.hal = HAL()
         self.gui = GUI(self.host, self.console, self.hal)
-     
+        # initialize Teleoperation variables
+        self.teop = False
+        self.speedV = 0.3
+        self.speedW = 0.5
+        self.stop = 0
+        self.key = None
+
+    def KeyEvent(self, key):
+        if(key == "w"):
+            self.hal.motors.sendV(self.speedV)
+        elif(key == "s"):
+            self.hal.motors.sendV(self.stop)
+            self.hal.motors.sendW(self.stop)
+        elif(key == "d"):
+            self.hal.motors.sendW(-self.speedW)
+        elif(key == "a"):
+            self.hal.motors.sendW(self.speedW)
+        elif(key == "q"):
+            self.speedV = self.speedV + 0.1 * self.speedV
+            if(self.speedV >= 0.75):
+                self.speedV = 0.75
+        elif(key == "z"):
+            self.speedV = self.speedV - 0.1 * self.speedV
+            if(self.speedV <= 0):
+                self.speedV = 0
+        elif(key == "e"):
+            self.speedW = self.speedW + 0.1 * self.speedW
+            if(self.speedW >= 0.75):
+                self.speedV = 0.75
+        elif(key == "c"):
+            self.speedW = self.speedW - 0.1 * self.speedW
+            if(self.speedW <= 0):
+                self.speedW = 0
+
     # Function for saving   
     def save_code(self, source_code):
     	with open('code/academy.py', 'w') as code_file:
@@ -60,7 +93,7 @@ class Template:
     # A few assumptions: 
     # 1. The user always passes sequential and iterative codes
     # 2. Only a single infinite loop
-    def parse_code(self, source_code):
+    def parse_code(self, source_code):            
     	# Check for save/load
     	if(source_code[:5] == "#save"):
     		source_code = source_code[5:]
@@ -75,23 +108,24 @@ class Template:
     		return "", "", 1
 
         elif(source_code[:5] == "#resu"):
-                restart_simulation = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
-                restart_simulation()
+            restart_simulation = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
+            restart_simulation()
 
-                return "", "", 1
+            return "", "", 1
 
         elif(source_code[:5] == "#paus"):
-                pause_simulation = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
-                pause_simulation()
+            pause_simulation = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
+            pause_simulation()
 
-                return "", "", 1
+            return "", "", 1
     		
     	elif(source_code[:5] == "#rest"):
     		reset_simulation = rospy.ServiceProxy('/gazebo/reset_world', Empty)
     		reset_simulation()
     		self.gui.reset_gui()
-    		return "", "", 1
-    		
+
+    		return "", "", 1    		
+ 
     	else:
     		# Get the frequency of operation, convert to time_cycle and strip
     		try:
@@ -101,11 +135,10 @@ class Template:
         	except:
         		debug_level = 1
         		source_code = ""
-    		
+
     		source_code = self.debug_parse(source_code, debug_level)
     		sequential_code, iterative_code = self.seperate_seq_iter(source_code)
     		return iterative_code, sequential_code, debug_level
-			
         
     # Function to parse code according to the debugging level
     def debug_parse(self, source_code, debug_level):
@@ -151,7 +184,7 @@ class Template:
         # print("The debug level is " + str(debug_level)
         # print(sequential_code)
         # print(iterative_code)
-        
+
         # Whatever the code is, first step is to just stop!
         self.hal.motors.sendV(0)
         self.hal.motors.sendW(0)
@@ -161,15 +194,14 @@ class Template:
             # Run the sequential part
             gui_module, hal_module = self.generate_modules()
             exec(sequential_code, {"GUI": gui_module, "HAL": hal_module, "time": time}, reference_environment)
-
             # Run the iterative part inside template
             # and keep the check for flag
             while self.reload == False:
                 start_time = datetime.now()
-                
+
                 # Execute the iterative portion
                 exec(iterative_code, reference_environment)
-
+                
                 # Template specifics to run!
                 finish_time = datetime.now()
                 dt = finish_time - start_time
@@ -203,8 +235,12 @@ class Template:
 
         # Add HAL functions
         hal_module.HAL.getPose3d = self.hal.pose3d.getPose3d
-        hal_module.HAL.motors.sendV = self.hal.motors.sendV
-        hal_module.HAL.motors.sendW = self.hal.motors.sendW
+        if(self.teop == False):
+            hal_module.HAL.motors.sendV = self.hal.motors.sendV
+            hal_module.HAL.motors.sendW = self.hal.motors.sendW
+        else:
+            del sys.modules["hal_module.HAL.motors.sendV"]
+            del sys.modules["hal_module.HAL.motors.sendW"]
         hal_module.HAL.getLaserData = self.hal.laser.getLaserData
         hal_module.HAL.getSonarData_0 = self.hal.sonar_0.getSonarData
         hal_module.HAL.getSonarData_1 = self.hal.sonar_1.getSonarData
@@ -285,15 +321,17 @@ class Template:
         if(self.thread != None):
             while self.thread.is_alive() or self.measure_thread.is_alive():
                 pass
-
-        # Turn the flag down, the iteration has successfully stopped!
-        self.reload = False
-        # New thread execution
-        self.measure_thread = threading.Thread(target=self.measure_frequency)
-        self.thread = threading.Thread(target=self.process_code, args=[source_code])
-        self.thread.start()
-        self.measure_thread.start()
-        print("New Thread Started!")
+        if(source_code[:4] == "#key"):
+            pass
+        else:
+            # Turn the flag down, the iteration has successfully stopped!
+            self.reload = False
+            # New thread execution
+            self.measure_thread = threading.Thread(target=self.measure_frequency)
+            self.thread = threading.Thread(target=self.process_code, args=[source_code])
+            self.thread.start()
+            self.measure_thread.start()
+            print("New Thread Started!")
 
     # Function to read and set frequency from incoming message
     def read_frequency_message(self, message):
@@ -316,7 +354,14 @@ class Template:
             frequency_message = message[5:]
             self.read_frequency_message(frequency_message)
             return
-        
+        elif(message[:5] == "#teop"):
+            self.teop = not self.teop
+            return
+        elif(message[:4] == "#key"):
+            if(self.teop == True):
+                self.key = message[4]
+                self.KeyEvent(self.key)
+                return
         try:
             # Once received turn the reload flag up and send it to execute_thread function
             code = message

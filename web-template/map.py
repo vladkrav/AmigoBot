@@ -245,7 +245,7 @@ class Map:
 				angle = angle + 0.015708
 			dist = laser.values[i]
 			if(dist == float("inf")):
-				dist = laser.maxRange
+				dist = laser.minRange
 			xr, yr = self.local2relative(self.config.laser['POS_X'], self.config.laser['POS_Y'], dist, angle)
 			xg, yg = self.relative2global(x_desired + (x - self.initial_x), y_desired + (y - self.initial_y), xr, yr, yaw_desired + (yaw - self.initial_yaw))
 			xc, yc = self.global2canvas(xg, yg)

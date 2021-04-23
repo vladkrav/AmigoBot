@@ -16,7 +16,7 @@ class HAL:
     
     def __init__(self):
         self.config = Config()
-    	rospy.init_node("HAL")
+    	# rospy.init_node("HAL")
         self.motors = PublisherMotors(self.config.topic_motors, 0.75, 0.75)
     	self.pose3d = ListenerPose3d(self.config.topic_pose)
         self.sonar_0 = ListenerSonar(self.config.topic_sonar_0)

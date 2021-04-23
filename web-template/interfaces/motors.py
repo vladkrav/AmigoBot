@@ -4,8 +4,6 @@ import threading
 from math import pi as PI
 from .threadPublisher import ThreadPublisher
 
-
-
 def cmdvel2Twist(vel):
 
     tw = Twist()
@@ -18,7 +16,6 @@ def cmdvel2Twist(vel):
 
     return tw
 
-
 class CMDVel ():
 
     def __init__(self):
@@ -30,8 +27,7 @@ class CMDVel ():
         self.ay = 0 # angular vel in X axis [rad/s]
         self.az = 0 # angular vel in Z axis [rad/s] (use this for W in wheeled robots)
         self.timeStamp = 0 # Time stamp [s]
-
-
+        
     def __str__(self):
         s = "CMDVel: {\n   vx: " + str(self.vx) + "\n   vy: " + str(self.vy)
         s = s + "\n   vz: " + str(self.vz) + "\n   ax: " + str(self.ax) 
