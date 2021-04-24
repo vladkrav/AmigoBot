@@ -49,33 +49,48 @@ class Template:
         self.speedW = 0.5
         self.stop = 0
         self.key = None
+        self.flag = 0
 
-    def KeyEvent(self, key):
-        if(key == "w"):
-            self.hal.motors.sendV(self.speedV)
-        elif(key == "s"):
-            self.hal.motors.sendV(self.stop)
-            self.hal.motors.sendW(self.stop)
-        elif(key == "d"):
-            self.hal.motors.sendW(-self.speedW)
-        elif(key == "a"):
-            self.hal.motors.sendW(self.speedW)
-        elif(key == "q"):
-            self.speedV = self.speedV + 0.1 * self.speedV
-            if(self.speedV >= 0.75):
-                self.speedV = 0.75
-        elif(key == "z"):
-            self.speedV = self.speedV - 0.1 * self.speedV
-            if(self.speedV <= 0):
-                self.speedV = 0
-        elif(key == "e"):
-            self.speedW = self.speedW + 0.1 * self.speedW
-            if(self.speedW >= 0.75):
-                self.speedV = 0.75
-        elif(key == "c"):
-            self.speedW = self.speedW - 0.1 * self.speedW
-            if(self.speedW <= 0):
-                self.speedW = 0
+    # def KeyEvent(self, key):
+    #     reference_environment = {'console': self.console, 'print': print_function}
+    #     gui_module, hal_module = self.generate_modules()
+    #     exec("", {"GUI": gui_module, "HAL": hal_module, "time": time}, reference_environment)
+
+    #     while self.teop == True:
+    #         start_time = datetime.now()
+    #         exec("", reference_environment)
+    #         if(key == "w"):
+    #             self.hal.motors.sendV(self.speedV)
+    #         elif(key == "s"):
+    #             self.hal.motors.sendV(self.stop)
+    #             self.hal.motors.sendW(self.stop)
+    #         elif(key == "d"):
+    #             self.hal.motors.sendW(-self.speedW)
+    #         elif(key == "a"):
+    #             self.hal.motors.sendW(self.speedW)
+    #         elif(key == "q"):
+    #             self.speedV = self.speedV + 0.1 * self.speedV
+    #             if(self.speedV >= 0.75):
+    #                 self.speedV = 0.75
+    #         elif(key == "z"):
+    #             self.speedV = self.speedV - 0.1 * self.speedV
+    #             if(self.speedV <= 0):
+    #                 self.speedV = 0
+    #         elif(key == "e"):
+    #             self.speedW = self.speedW + 0.1 * self.speedW
+    #             if(self.speedW >= 0.75):
+    #                 self.speedV = 0.75
+    #         elif(key == "c"):
+    #             self.speedW = self.speedW - 0.1 * self.speedW
+    #             if(self.speedW <= 0):
+    #                 self.speedW = 0
+    #         else:
+    #             pass
+    #         finish_time = datetime.now()
+    #         dt = finish_time - start_time
+    #         ms = (dt.days * 24 * 60 * 60 + dt.seconds) * 1000 + dt.microseconds / 1000.0
+    #         if(ms < self.time_cycle):
+    #             time.sleep((self.time_cycle - ms) / 1000.0)
 
     # Function for saving   
     def save_code(self, source_code):
@@ -175,6 +190,38 @@ class Template:
         return sequential_code, iterative_code
 
 
+    def KeyEvent(self, key):
+
+        if(key == "w"):
+            self.hal.motors.sendV(self.speedV)
+        elif(key == "s"):
+            self.hal.motors.sendV(self.stop)
+            self.hal.motors.sendW(self.stop)
+        elif(key == "d"):
+            self.hal.motors.sendW(-self.speedW)
+        elif(key == "a"):
+            self.hal.motors.sendW(self.speedW)
+        elif(key == "q"):
+            self.speedV = self.speedV + 0.1 * self.speedV
+            if(self.speedV >= 0.75):
+                self.speedV = 0.75
+        elif(key == "z"):
+            self.speedV = self.speedV - 0.1 * self.speedV
+            if(self.speedV <= 0):
+                self.speedV = 0
+        elif(key == "e"):
+            self.speedW = self.speedW + 0.1 * self.speedW
+            if(self.speedW >= 0.75):
+                self.speedV = 0.75
+        elif(key == "c"):
+            self.speedW = self.speedW - 0.1 * self.speedW
+            if(self.speedW <= 0):
+                self.speedW = 0
+        else:
+            pass
+        self.gui.update_gui()
+
+
     # The process function
     def process_code(self, source_code):
         # Reference Environment for the exec() function
@@ -201,7 +248,8 @@ class Template:
 
                 # Execute the iterative portion
                 exec(iterative_code, reference_environment)
-                
+                if(self.teop == True):
+                    self.KeyEvent(self.key)
                 # Template specifics to run!
                 finish_time = datetime.now()
                 dt = finish_time - start_time
@@ -238,9 +286,12 @@ class Template:
         if(self.teop == False):
             hal_module.HAL.motors.sendV = self.hal.motors.sendV
             hal_module.HAL.motors.sendW = self.hal.motors.sendW
+            self.flag = 0
         else:
-            del sys.modules["hal_module.HAL.motors.sendV"]
-            del sys.modules["hal_module.HAL.motors.sendW"]
+            if(self.flag == 0):
+                del sys.modules["hal_module.HAL.motors.sendV"]
+                del sys.modules["hal_module.HAL.motors.sendW"]
+                self.flag = 1
         hal_module.HAL.getLaserData = self.hal.laser.getLaserData
         hal_module.HAL.getSonarData_0 = self.hal.sonar_0.getSonarData
         hal_module.HAL.getSonarData_1 = self.hal.sonar_1.getSonarData
@@ -321,17 +372,22 @@ class Template:
         if(self.thread != None):
             while self.thread.is_alive() or self.measure_thread.is_alive():
                 pass
-        if(source_code[:4] == "#key"):
-            pass
-        else:
-            # Turn the flag down, the iteration has successfully stopped!
-            self.reload = False
-            # New thread execution
-            self.measure_thread = threading.Thread(target=self.measure_frequency)
-            self.thread = threading.Thread(target=self.process_code, args=[source_code])
-            self.thread.start()
-            self.measure_thread.start()
-            print("New Thread Started!")
+                # self.reload = False
+                # self.measure_thread = threading.Thread(target=self.measure_frequency)
+                # self.thread = threading.Thread(target=self.process_code, args=[source_code])
+        # if(source_code[:4] == "#key"):
+        #     self.reload = False
+        # else:
+        # Turn the flag down, the iteration has successfully stopped!
+        self.reload = False
+        # New thread execution
+        self.measure_thread = threading.Thread(target=self.measure_frequency)
+        self.thread = threading.Thread(target=self.process_code, args=[source_code])
+        # self.key_thread = threading.Thread(target=self.KeyEvent, args=[self.key])
+        self.thread.start()
+        self.measure_thread.start()
+        # self.key_thread.start()
+        print("New Thread Started!")
 
     # Function to read and set frequency from incoming message
     def read_frequency_message(self, message):
@@ -360,16 +416,17 @@ class Template:
         elif(message[:4] == "#key"):
             if(self.teop == True):
                 self.key = message[4]
-                self.KeyEvent(self.key)
-                return
-        try:
-            # Once received turn the reload flag up and send it to execute_thread function
-            code = message
-            # print(repr(code))
-            self.reload = True
-            self.execute_thread(code)
-        except:
-            pass
+                self.reload = False
+                # self.KeyEvent(self.key)
+        else:
+            try:
+                # Once received turn the reload flag up and send it to execute_thread function
+                code = message
+                # print(repr(code))
+                self.reload = True
+                self.execute_thread(code)
+            except:
+                pass
 
     # Function that gets called when the server is connected
     def connected(self, client, server):

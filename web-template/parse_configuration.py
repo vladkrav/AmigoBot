@@ -2,6 +2,7 @@ import json
 import math
 import rospy
 from std_msgs.msg import Int32
+from interfaces.pose3d import ListenerPose3d
 import os
 
 class Config:
@@ -39,4 +40,7 @@ class Config:
             self.pub_motors = rospy.Publisher(self.topic_enable_motors, Int32, queue_size=1)
             self.pub_motors.publish(self.msg)
         else:
-            None
+            pass
+            # self.pos_x = ListenerPose3d.getPose3d.x
+            # self.pos_y = ListenerPose3d.getPose3d.y
+            # self.orientation = ListenerPose3d.getPose3d.yaw
