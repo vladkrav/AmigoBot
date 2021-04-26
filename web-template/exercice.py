@@ -50,6 +50,8 @@ class Template:
         self.stop = 0
         self.key = None
         self.flag = 0
+        self.pattern_V = 'HAL.motors.sendV'
+        self.pattern_W = 'HAL.motors.sendW'
 
     # def KeyEvent(self, key):
     #     reference_environment = {'console': self.console, 'print': print_function}
@@ -212,7 +214,7 @@ class Template:
         elif(key == "e"):
             self.speedW = self.speedW + 0.1 * self.speedW
             if(self.speedW >= 0.75):
-                self.speedV = 0.75
+                self.speedW = 0.75
         elif(key == "c"):
             self.speedW = self.speedW - 0.1 * self.speedW
             if(self.speedW <= 0):
@@ -245,11 +247,13 @@ class Template:
             # and keep the check for flag
             while self.reload == False:
                 start_time = datetime.now()
-
                 # Execute the iterative portion
-                exec(iterative_code, reference_environment)
                 if(self.teop == True):
                     self.KeyEvent(self.key)
+                    iterative_code = re.sub(self.pattern_V, '#', iterative_code)
+                    iterative_code = re.sub(self.pattern_W, '#', iterative_code)
+
+                exec(iterative_code, reference_environment)
                 # Template specifics to run!
                 finish_time = datetime.now()
                 dt = finish_time - start_time
@@ -283,15 +287,8 @@ class Template:
 
         # Add HAL functions
         hal_module.HAL.getPose3d = self.hal.pose3d.getPose3d
-        if(self.teop == False):
-            hal_module.HAL.motors.sendV = self.hal.motors.sendV
-            hal_module.HAL.motors.sendW = self.hal.motors.sendW
-            self.flag = 0
-        else:
-            if(self.flag == 0):
-                del sys.modules["hal_module.HAL.motors.sendV"]
-                del sys.modules["hal_module.HAL.motors.sendW"]
-                self.flag = 1
+        hal_module.HAL.motors.sendV = self.hal.motors.sendV
+        hal_module.HAL.motors.sendW = self.hal.motors.sendW
         hal_module.HAL.getLaserData = self.hal.laser.getLaserData
         hal_module.HAL.getSonarData_0 = self.hal.sonar_0.getSonarData
         hal_module.HAL.getSonarData_1 = self.hal.sonar_1.getSonarData
@@ -372,21 +369,13 @@ class Template:
         if(self.thread != None):
             while self.thread.is_alive() or self.measure_thread.is_alive():
                 pass
-                # self.reload = False
-                # self.measure_thread = threading.Thread(target=self.measure_frequency)
-                # self.thread = threading.Thread(target=self.process_code, args=[source_code])
-        # if(source_code[:4] == "#key"):
-        #     self.reload = False
-        # else:
         # Turn the flag down, the iteration has successfully stopped!
         self.reload = False
         # New thread execution
         self.measure_thread = threading.Thread(target=self.measure_frequency)
         self.thread = threading.Thread(target=self.process_code, args=[source_code])
-        # self.key_thread = threading.Thread(target=self.KeyEvent, args=[self.key])
         self.thread.start()
         self.measure_thread.start()
-        # self.key_thread.start()
         print("New Thread Started!")
 
     # Function to read and set frequency from incoming message
@@ -412,21 +401,19 @@ class Template:
             return
         elif(message[:5] == "#teop"):
             self.teop = not self.teop
-            return
         elif(message[:4] == "#key"):
             if(self.teop == True):
                 self.key = message[4]
                 self.reload = False
-                # self.KeyEvent(self.key)
-        else:
-            try:
-                # Once received turn the reload flag up and send it to execute_thread function
-                code = message
-                # print(repr(code))
-                self.reload = True
-                self.execute_thread(code)
-            except:
-                pass
+            return
+        try:
+            # Once received turn the reload flag up and send it to execute_thread function
+            code = message
+            # print(repr(code))
+            self.reload = True
+            self.execute_thread(code)
+        except:
+            pass
 
     # Function that gets called when the server is connected
     def connected(self, client, server):
