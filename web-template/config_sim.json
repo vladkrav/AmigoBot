@@ -3,6 +3,8 @@
         "POS_X" : 4,
         "POS_Y" : 8,
         "ORIENTATION" : 0,
+        "MAX_VEL_V" : 0.75,
+        "MAX_VEL_W" : 0.75,
         "TOPIC_POSE" : "/robot0/odom",
         "TOPIC_MOTOR" : "/robot0/cmd_vel",
         "TOPIC_LASER" : "/robot0/laser_1",
