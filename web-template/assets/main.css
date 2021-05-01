@@ -145,6 +145,21 @@ margin-bottom: 10px;
     border-image: linear-gradient(to bottom, whitesmoke 0%,  #000 100%);
     border-image-slice: 1;
 }
+#mapping_btn{
+    font-size: 10px;
+    width: 80px;
+    height: 45px;
+    border: 2px solid black;
+    background-color: white;
+    margin-left: 10px;
+}
+#mapping_btn:hover{
+    border: 2px solid transparent;
+    -moz-border-image: -moz-linear-gradient(bottom, whitesmoke 0%, #000 100%);
+    -webkit-border-image: -webkit-linear-gradient(bottom, whitesmoke 0%, #000 100%);
+    border-image: linear-gradient(to bottom, whitesmoke 0%, #000 100%);
+    border-image-slice: 1;
+}
 
 #terminalimg {
     float: left;

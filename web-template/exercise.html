@@ -86,6 +86,7 @@ while True:
   <div id="visual_buttons" class="row no-gutters">
     <button id="gzweb_btn" type="button" onclick="changegzweb()"><img id="gzimg" src="./assets/img/gzweb_btn.png"></button>
     <button id="console_btn" type="button" onclick="changeconsole()"><img id="terminalimg" src="./assets/img/terminal-solid.svg"> Console</button>
+    <button id="mapping_btn" type="button" onclick="changemapping()"><img id="mappingimg" src="./assets/img/mapping_btn.png"> Mapping</button>
     <!-- Implement the button ON/OFF for the teleoperation mode -->
     <div class="switch-button"> 
       <p><strong>Teleoperation</strong></p>
@@ -98,6 +99,9 @@ while True:
   <div id="visual">
     <!-- Canvas -->
     <canvas id="birds-eye"></canvas>
+    <!-- <div id="mapping"> -->
+    <canvas id="mapping" style="display: none;"></canvas>
+    <!-- </div> -->
     <!-- <canvas id="gui_canvas"></canvas> -->
   </div>
   <div id="console" style="display:none;">
@@ -131,6 +135,15 @@ while True:
           document.getElementById('iframeGzweb').style.display = 'none';
         }
       }
+      function changemapping(){
+        var mapping_display = document.getElementById("mapping").style.display
+        console.log(mapping_display)
+        if(mapping_display == "none" || mapping_display == "none"){
+          document.getElementById('mapping').style.display = 'block';
+        } else{
+          document.getElementById('mapping').style.display = 'none';
+        }
+      }
   </script>
 </div>
 </div>
@@ -152,5 +165,6 @@ while True:
 	<script src="assets/local_functions.js" type="text/javascript" charset="utf-8"></script>
   <script src="assets/birds_eye.js" type="text/javascript" charset="utf-8"></script>
   <script src="assets/console.js" type="text/javascript" charset="utf-8"></script>
+  <script src="assets/mapping.js" type="text/javascript" charset="utf-8"></script>
 
 </html>

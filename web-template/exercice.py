@@ -402,9 +402,9 @@ class Template:
         elif(message[:5] == "#teop"):
             self.teop = not self.teop
         elif(message[:4] == "#key"):
-            if(self.teop == True):
-                self.key = message[4]
-                self.reload = False
+            # if(self.teop == True):
+            self.key = message[4]
+            self.reload = False
             return
         try:
             # Once received turn the reload flag up and send it to execute_thread function

@@ -46,6 +46,7 @@ function declare_gui(websocket_address){
 			var pos_vertices = data.pos_vertices;
 			/*Draw all*/
 			draw(robot_coord, robot_cont, laser_data, sonar_sensor_point, pos_vertices, laser_global);
+			drawMapping(laser_data);
 			// Parse the Console messages
 			messages = JSON.parse(data.text_buffer);
 			// Loop through the messages and print them on the console

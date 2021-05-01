@@ -30,4 +30,11 @@
     height: 729px;
     width: 769px;
 }
+#mapping{
+    margin-top: 15px;
+    background: #fdffff;
+    background-size: cover;
+    height: 500px;
+    width: 500px;
+}
 

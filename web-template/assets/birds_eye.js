@@ -2,6 +2,7 @@
 var mapCanvas = document.getElementById("birds-eye"),
 	ctx = mapCanvas.getContext("2d");
 	
+	
 var trail = [],
 	coords = [-1, -1];;
 
@@ -10,8 +11,8 @@ function draw(pos, contorno, laser_data, sonar_sensor_point, pos_vertices, laser
 	mapCanvas.width = 769;
 	mapCanvas.height = 729;
 	
-	clearMap();
-	drawTrail(coords[0], coords[1]);
+	// clearMap();
+	// drawTrail(coords[0], coords[1]);
 	drawLaser(laser_data, laser_global);
 	drawAmigobot(pos, contorno);
 	drawSonar(sonar_sensor_point, pos_vertices);
