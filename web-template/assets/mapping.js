@@ -16,8 +16,10 @@ function clearMap(){
 function drawMap(dataLaser){
     ctx_map.fillStyle = "black";
 	for(let d of dataLaser){
-        ctx_map.beginPath();
+        // ctx_map.beginPath();
 		ctx_map.fillRect(d[0],d[1],1,1);
         // ctx_map.closePath();
+        ctx_map.save();
+        
 	}
 }

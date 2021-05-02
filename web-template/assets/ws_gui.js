@@ -21,7 +21,7 @@ function declare_gui(websocket_address){
 			alert(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
 		}
 		else{
-			//alert("[close] Connection closed!");
+			alert("[close] Connection closed!");
 		}
 	}
 
