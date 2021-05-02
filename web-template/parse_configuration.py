@@ -11,6 +11,8 @@ class Config:
             self.config = json.load(file)
         self.pos_x = self.config['CONFIGURATION']['POS_X']
         self.pos_y = self.config['CONFIGURATION']['POS_Y']
+        self.max_velV = self.config['CONFIGURATION']['MAX_VEL_V']
+        self.max_velW = self.config['CONFIGURATION']['MAX_VEL_W']
         self.orientation = math.radians(self.config['CONFIGURATION']['ORIENTATION'])
         self.sonar_0 = self.config['CONFIGURATION']['SONAR_0']
         self.sonar_1 = self.config['CONFIGURATION']['SONAR_1']

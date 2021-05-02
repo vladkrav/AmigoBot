@@ -3,6 +3,8 @@
         "POS_X" : 14,
         "POS_Y" : 14,
         "ORIENTATION" : 90,
+        "MAX_VEL_V" : 0.75,
+        "MAX_VEL_W" : 0.75,
         "TOPIC_POSE" : "/pose",
         "TOPIC_MOTOR" : "/cmd_vel",
         "TOPIC_LASER" : "/scan",
