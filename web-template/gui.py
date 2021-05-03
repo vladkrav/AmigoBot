@@ -17,15 +17,7 @@ class GUI:
     # The actual initialization
     def __init__(self, host, console, hal):
         t = threading.Thread(target=self.run_server)
-        
-        # self.payload = {
-        #     'map': '',
-        #     'text_buffer': '',
-        #     'laser': '',
-        #     'sonar_sensor': '',
-        #     'pos_vertices': '',
-        #     'laser_global': ''
-        #     }
+
         self.payload = {
             'robot_coord': '',
             'robot_contorno': '',
@@ -33,8 +25,12 @@ class GUI:
             'laser': '',
             'sonar_sensor': '',
             'pos_vertices': '',
-            'laser_global': ''
+            'laser_global': '',
+            'EnableMapping': ''
             }
+        self.map_message = {
+            'EnableMapping': ''
+        }
         self.server = None
         self.client = None
         
@@ -120,6 +116,12 @@ class GUI:
     # Function to reset
     def reset_gui(self):
         self.map.reset()
+
+    #Function to show Mapping
+    def showMapping(self, flag):
+        self.map_message["EnableMapping"] = flag
+        message = "#map" + json.dumps(self.map_message)
+        self.server.send_message(self.client, message)
         
 
 # This class decouples the user thread

@@ -4,6 +4,7 @@ h4{
 }
 
 #Console{
+    margin-top: 15px;
     background-color: black;
     font-family: 'Helvetica', Arial, Lucida Grande, sans-serif;
     font-weight: bold;

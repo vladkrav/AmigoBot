@@ -53,47 +53,6 @@ class Template:
         self.pattern_V = 'HAL.motors.sendV'
         self.pattern_W = 'HAL.motors.sendW'
 
-    # def KeyEvent(self, key):
-    #     reference_environment = {'console': self.console, 'print': print_function}
-    #     gui_module, hal_module = self.generate_modules()
-    #     exec("", {"GUI": gui_module, "HAL": hal_module, "time": time}, reference_environment)
-
-    #     while self.teop == True:
-    #         start_time = datetime.now()
-    #         exec("", reference_environment)
-    #         if(key == "w"):
-    #             self.hal.motors.sendV(self.speedV)
-    #         elif(key == "s"):
-    #             self.hal.motors.sendV(self.stop)
-    #             self.hal.motors.sendW(self.stop)
-    #         elif(key == "d"):
-    #             self.hal.motors.sendW(-self.speedW)
-    #         elif(key == "a"):
-    #             self.hal.motors.sendW(self.speedW)
-    #         elif(key == "q"):
-    #             self.speedV = self.speedV + 0.1 * self.speedV
-    #             if(self.speedV >= 0.75):
-    #                 self.speedV = 0.75
-    #         elif(key == "z"):
-    #             self.speedV = self.speedV - 0.1 * self.speedV
-    #             if(self.speedV <= 0):
-    #                 self.speedV = 0
-    #         elif(key == "e"):
-    #             self.speedW = self.speedW + 0.1 * self.speedW
-    #             if(self.speedW >= 0.75):
-    #                 self.speedV = 0.75
-    #         elif(key == "c"):
-    #             self.speedW = self.speedW - 0.1 * self.speedW
-    #             if(self.speedW <= 0):
-    #                 self.speedW = 0
-    #         else:
-    #             pass
-    #         finish_time = datetime.now()
-    #         dt = finish_time - start_time
-    #         ms = (dt.days * 24 * 60 * 60 + dt.seconds) * 1000 + dt.microseconds / 1000.0
-    #         if(ms < self.time_cycle):
-    #             time.sleep((self.time_cycle - ms) / 1000.0)
-
     # Function for saving   
     def save_code(self, source_code):
     	with open('code/academy.py', 'w') as code_file:
@@ -306,6 +265,7 @@ class Template:
         # Add GUI functions
         # gui_module.GUI.showImage = self.gui.showImage
         gui_module.GUI.update = self.gui.update_gui
+        gui_module.GUI.EnableMapping = self.gui.showMapping
 
         # Adding modules to system
         # Protip: The names should be different from

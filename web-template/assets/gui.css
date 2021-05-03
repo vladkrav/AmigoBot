@@ -11,6 +11,7 @@
 
 
 #gzweb{
+    margin-top: 15px;
     height: 40%;
     width:100%;
 }
@@ -30,6 +31,7 @@
     height: 729px;
     width: 769px;
 }
+
 #mapping{
     margin-top: 15px;
     background: #fdffff;

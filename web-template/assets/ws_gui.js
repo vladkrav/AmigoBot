@@ -1,7 +1,5 @@
-// Set the src of iframe tag
-//document.getElementById("gzweb").setAttribute(
-//	"src", "http://" + websocket_address + ":8080")
 
+var enable_flag = 0;
 // To decode the image string we will receive from server
 function decode_utf8(s){
     return decodeURIComponent(escape(s))
@@ -29,8 +27,12 @@ function declare_gui(websocket_address){
 	websocket_gui.onmessage = function(event){
 		/*Extrae caracteres desde un indiceA hasta un indiceB sin incluirlo */
 		var operation = event.data.substring(0, 4); /*Devuelve un subconunto de un objeto String*/
-		
-		if(operation == "#gui"){
+
+		if(operation == "#map"){
+			var data_map = JSON.parse(event.data.substring(4, ));
+			enable_flag = data_map.EnableMapping;
+		}
+		else if(operation == "#gui"){
 			// Parse the entire Object
 			/*Analiza una cadena de texto como JSON, transformando opcionalmente el valor producido por el analisis */
 			var data = JSON.parse(event.data.substring(4, ));
@@ -46,7 +48,14 @@ function declare_gui(websocket_address){
 			var pos_vertices = data.pos_vertices;
 			/*Draw all*/
 			draw(robot_coord, robot_cont, laser_data, sonar_sensor_point, pos_vertices, laser_global);
-			drawMapping(laser_data);
+			/*If enabled draw the mapping*/
+			if(enable_flag == 1){
+				drawMapping(laser_data);
+			}
+			else{
+				enable_flag = 0;
+			}
+			
 			// Parse the Console messages
 			messages = JSON.parse(data.text_buffer);
 			// Loop through the messages and print them on the console
@@ -74,24 +83,3 @@ function declare_gui(websocket_address){
 		
 	}
 }
-
-
-// Image Display Configuration
-
-// var canvas = document.getElementById("gui_canvas"),
-//     context = canvas.getContext('2d');
-//     image = new Image();
-    
-// Lap time DOM
-// var lap_time_display = document.getElementById("lap_time");
-
-// For image object
-// image.onload = function(){
-//     update_image();
-// }
-
-// Request Animation Frame to remove the flickers
-// function update_image(){
-// 	window.requestAnimationFrame(update_image);
-// 	context.drawImage(image, 0, 0);
-// }
