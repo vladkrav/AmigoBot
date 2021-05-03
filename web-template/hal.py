@@ -16,7 +16,7 @@ class HAL:
     
     def __init__(self):
         self.config = Config()
-        self.motors = PublisherMotors(self.config.topic_motors, self.max_velV, self.max_velW)
+        self.motors = PublisherMotors(self.config.topic_motors, self.config.max_velV, self.config.max_velW)
     	self.pose3d = ListenerPose3d(self.config.topic_pose)
         self.sonar_0 = ListenerSonar(self.config.topic_sonar_0)
         self.sonar_1 = ListenerSonar(self.config.topic_sonar_1)

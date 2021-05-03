@@ -1,5 +1,6 @@
 var mapping = document.getElementById("mapping"),
     ctx_map = mapping.getContext("2d");
+var i = 0;
 
 var trail = [],
 	coords = [-1, -1];;
@@ -15,11 +16,22 @@ function clearMap(){
 }
 function drawMap(dataLaser){
     ctx_map.fillStyle = "black";
+    // In the first iteration there is nothing to restore
+    if(i != 0){
+        restoreDrawingSurface();
+    }
+    else{
+        i = 1;
+    }
+    
 	for(let d of dataLaser){
-        // ctx_map.beginPath();
 		ctx_map.fillRect(d[0],d[1],1,1);
-        // ctx_map.closePath();
-        ctx_map.save();
-        
 	}
+    saveDrawingSurface();
+}
+function saveDrawingSurface(){
+    drawingSurfaceImageData = ctx_map.getImageData(0, 0, mapping.width, mapping.height);
+}
+function restoreDrawingSurface(){
+    ctx_map.putImageData(drawingSurfaceImageData, 0, 0);
 }
