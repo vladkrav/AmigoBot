@@ -84,17 +84,31 @@ while True:
         </div>
 <div class="split b">
   <div id="visual_buttons" class="row no-gutters">
-    <button id="gzweb_btn" type="button" onclick="changegzweb()"><img id="gzimg" src="./assets/img/gzweb_btn.png"></button>
+    <!-- <button id="gzweb_btn" type="button" onclick="changegzweb()"><img id="gzimg" src="./assets/img/gzweb_btn.png"></button> -->
     <button id="console_btn" type="button" onclick="changeconsole()"><img id="terminalimg" src="./assets/img/terminal-solid.svg"> Console</button>
     <button id="mapping_btn" type="button" onclick="changemapping()"><img id="mappingimg" src="./assets/img/mapping_btn.png"> Mapping</button>
     <!-- Implement the button ON/OFF for the teleoperation mode -->
-    <div class="switch-button"> 
-      <p><strong>Teleoperation</strong></p>
-      <input id="switch-label" type="checkbox" name="switch-button" class="switch-button__checkbox" onclick="Teleoperation()">
-      <label for="switch-label" class="switch-button__label"></label>
-      <body onkeydown="keyEvent(event)"></body>
-      <!-- Source https://programadorwebvalencia.com/sencillo-boton-on-off-html-y-css/ -->
+    <div class="popup"onmouseover="HelpWindow()" onmouseout="HelpWindow()">
+      <div class="switch-button" >
+        <span class="popuptext" id="myPopup">
+          <b>When Teleoperation is ON, use the following keys:<br></b>
+          <b>'w'</b> -> Go forward<br>
+          <b>'s'</b> -> Stop<br>
+          <b>'a'</b> -> Turn left<br>
+          <b>'d'</b> -> Turn right<br>
+          <b>'q'</b> -> Increase linear speed 10%<br>
+          <b>'z'</b> -> Decrease linear speed 10%<br>
+          <b>'e'</b> -> Increase angular speed 10%<br>
+          <b>'c'</b> -> Decrease angular speed 10%"<br>
+        </span>
+        <p><strong>Teleoperation</strong></p>
+        <input id="switch-label" type="checkbox" name="switch-button" class="switch-button__checkbox" onclick="Teleoperation()">
+        <label for="switch-label" class="switch-button__label"></label>
+        <body onkeydown="keyEvent(event)"></body>
+        <!-- Source https://programadorwebvalencia.com/sencillo-boton-on-off-html-y-css/ -->
+      </div>
     </div>
+    
   </div>
   <div id="visual">
     <!-- Canvas -->
@@ -125,16 +139,16 @@ while True:
           document.getElementById('console').style.display = 'none';
         }
       }
-      function changegzweb(){
-        document.getElementById("iframeGzweb").setAttribute("src", "http://" + websocket_address + ":8080")
-        var display = document.getElementById('iframeGzweb').style.display
-        console.log(display)
-        if (display == "none" || display == "none" ) {
-          document.getElementById('iframeGzweb').style.display = 'block';
-        } else{
-          document.getElementById('iframeGzweb').style.display = 'none';
-        }
-      }
+      // function changegzweb(){
+      //   document.getElementById("iframeGzweb").setAttribute("src", "http://" + websocket_address + ":8080")
+      //   var display = document.getElementById('iframeGzweb').style.display
+      //   console.log(display)
+      //   if (display == "none" || display == "none" ) {
+      //     document.getElementById('iframeGzweb').style.display = 'block';
+      //   } else{
+      //     document.getElementById('iframeGzweb').style.display = 'none';
+      //   }
+      // }
       function changemapping(){
         var mapping_display = document.getElementById("mapping").style.display
         console.log(mapping_display)
@@ -143,6 +157,10 @@ while True:
         } else{
           document.getElementById('mapping').style.display = 'none';
         }
+      }
+      function HelpWindow(){
+        var popup = document.getElementById("myPopup");
+        popup.classList.toggle("show");
       }
   </script>
 </div>

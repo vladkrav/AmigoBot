@@ -112,7 +112,7 @@ margin-bottom: 10px;
     border-image-slice: 1;
 }
 
-#gzweb_btn{
+/* #gzweb_btn{
     margin-left: 10%;
     width: 80px;
     height: 45px;
@@ -126,7 +126,7 @@ margin-bottom: 10px;
     -webkit-border-image: -webkit-linear-gradient(bottom, whitesmoke 0%, #000 100%);
     border-image: linear-gradient(to bottom, whitesmoke 0%,  #000 100%);
     border-image-slice: 1;
-}
+} */
 
 #console_btn{
     font-size: 10px;

@@ -16,6 +16,10 @@ var frequency = "0",
 //WebSocket for Code
 var websocket_code;
 var teleop_switch = false;
+ArrayText = new Array();
+ArrayText ['something'] = "When Teleoperation is ON, use the following keys: \n 'w' -> Go forward \n 's' -> Stop \n 'a' -> Turn left\n 'd' -> Turn right\n 'q' -> Increase linear speed 10%\n 'z' -> Decrease linear speed 10%\n 'e' -> Increase angular speed 10%\n 'c' -> Decrease angular speed 10%\n";
+ArrayText ['nothing'] = "";
+
 function declare_code(websocket_address){
 	websocket_code = new WebSocket("ws://" + websocket_address + ":1905/");
 
@@ -129,6 +133,8 @@ function keyEvent(event){
 	var key = event.key;
 	message = message + key;
 	websocket_code.send(message);
-
-
+}
+function displayText(text_msg){
+	HelpWindow = document.getElementById("switch-label");
+	HelpWindow.innerHTML = ArrayText[text_msg];
 }
