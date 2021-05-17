@@ -28,11 +28,11 @@ function declare_gui(websocket_address){
 		/*Extrae caracteres desde un indiceA hasta un indiceB sin incluirlo */
 		var operation = event.data.substring(0, 4); /*Devuelve un subconunto de un objeto String*/
 
-		if(operation == "#map"){
-			var data_map = JSON.parse(event.data.substring(4, ));
-			enable_flag = data_map.EnableMapping;
-		}
-		else if(operation == "#gui"){
+		// if(operation == "#map"){
+		// 	var data_map = JSON.parse(event.data.substring(4, ));
+		// 	enable_flag = data_map.EnableMapping;
+		// }
+		if(operation == "#gui"){
 			// Parse the entire Object
 			/*Analiza una cadena de texto como JSON, transformando opcionalmente el valor producido por el analisis */
 			var data = JSON.parse(event.data.substring(4, ));
@@ -50,7 +50,7 @@ function declare_gui(websocket_address){
 			draw(robot_coord, robot_cont, laser_data, sonar_sensor_point, pos_vertices, laser_global);
 			/*If enabled draw the mapping*/
 			if(enable_flag == 1){
-				drawMapping(laser_data);
+				drawMapping(laser_data, robot_coord);
 			}
 			else{
 				enable_flag = 0;
@@ -83,3 +83,15 @@ function declare_gui(websocket_address){
 		
 	}
 }
+
+function changemapping(){
+	var mapping_display = document.getElementById("mapping").style.display
+	console.log(mapping_display)
+	if(mapping_display == "none" || mapping_display == "none"){
+	  document.getElementById('mapping').style.display = 'block';
+	  enable_flag = 1;
+	} else{
+	  document.getElementById('mapping').style.display = 'none';
+	  enable_flag = 0;
+	}
+  }

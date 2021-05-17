@@ -99,7 +99,7 @@ while True:
           <b>'q'</b> -> Increase linear speed 10%<br>
           <b>'z'</b> -> Decrease linear speed 10%<br>
           <b>'e'</b> -> Increase angular speed 10%<br>
-          <b>'c'</b> -> Decrease angular speed 10%"<br>
+          <b>'c'</b> -> Decrease angular speed 10%<br>
         </span>
         <p><strong>Teleoperation</strong></p>
         <input id="switch-label" type="checkbox" name="switch-button" class="switch-button__checkbox" onclick="Teleoperation()">
@@ -149,15 +149,15 @@ while True:
       //     document.getElementById('iframeGzweb').style.display = 'none';
       //   }
       // }
-      function changemapping(){
-        var mapping_display = document.getElementById("mapping").style.display
-        console.log(mapping_display)
-        if(mapping_display == "none" || mapping_display == "none"){
-          document.getElementById('mapping').style.display = 'block';
-        } else{
-          document.getElementById('mapping').style.display = 'none';
-        }
-      }
+      // function changemapping(){
+      //   var mapping_display = document.getElementById("mapping").style.display
+      //   console.log(mapping_display)
+      //   if(mapping_display == "none" || mapping_display == "none"){
+      //     document.getElementById('mapping').style.display = 'block';
+      //   } else{
+      //     document.getElementById('mapping').style.display = 'none';
+      //   }
+      // }
       function HelpWindow(){
         var popup = document.getElementById("myPopup");
         popup.classList.toggle("show");
