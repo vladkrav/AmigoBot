@@ -27,11 +27,7 @@ function declare_gui(websocket_address){
 	websocket_gui.onmessage = function(event){
 		/*Extrae caracteres desde un indiceA hasta un indiceB sin incluirlo */
 		var operation = event.data.substring(0, 4); /*Devuelve un subconunto de un objeto String*/
-
-		// if(operation == "#map"){
-		// 	var data_map = JSON.parse(event.data.substring(4, ));
-		// 	enable_flag = data_map.EnableMapping;
-		// }
+		
 		if(operation == "#gui"){
 			// Parse the entire Object
 			/*Analiza una cadena de texto como JSON, transformando opcionalmente el valor producido por el analisis */

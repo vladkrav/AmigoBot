@@ -265,7 +265,7 @@ class Template:
         # Add GUI functions
         # gui_module.GUI.showImage = self.gui.showImage
         gui_module.GUI.update = self.gui.update_gui
-        gui_module.GUI.EnableMapping = self.gui.showMapping
+        # gui_module.GUI.EnableMapping = self.gui.showMapping
 
         # Adding modules to system
         # Protip: The names should be different from
