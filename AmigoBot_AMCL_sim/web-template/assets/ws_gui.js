@@ -42,8 +42,12 @@ function declare_gui(websocket_address){
 			var laser_global = data.laser_global;
 			var sonar_sensor_point = data.sonar_sensor;
 			var pos_vertices = data.pos_vertices;
+			var approximated_robot_x = data.approximated_robot_x;
+			var approximated_robot_y = data.approximated_robot_y;
+			var particles = data.particles;
 			/*Draw all*/
-			draw(robot_coord, robot_cont, laser_data, sonar_sensor_point, pos_vertices, laser_global);
+			draw(robot_coord, robot_cont, laser_data, sonar_sensor_point, pos_vertices, laser_global,
+				approximated_robot_x, approximated_robot_y, particles);
 			/*If enabled draw the mapping*/
 			if(enable_flag == 1){
 				drawMapping(laser_data, robot_coord);

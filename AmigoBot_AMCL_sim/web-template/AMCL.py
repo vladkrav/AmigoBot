@@ -1,100 +1,76 @@
-#!/usr/bin/env python
-from __future__ import print_function
- 
-import sys
-import time
-from math import fmod, pi
- 
-import unittest
-import rospy
-import rostest
- 
-import tf2_py as tf2
-import tf2_ros
-import PyKDL
-from std_srvs.srv import Empty
- 
- 
-class TestBasicLocalization(unittest.TestCase):
-    def setUp(self):
-        self.tf = None
-        self.target_x = None
-        self.target_y = None
-        self.target_a = None
-        self.tfBuffer = None
- 
-    def print_pose_diff(self):
-        a_curr = self.compute_angle()
-        a_diff = self.wrap_angle(a_curr - self.target_a)
-        print('Curr:\t %16.6f %16.6f %16.6f' % (self.tf.translation.x, self.tf.translation.y, a_curr))
-        print('Target:\t %16.6f %16.6f %16.6f' % (self.target_x, self.target_y, self.target_a))
-        print('Diff:\t %16.6f %16.6f %16.6f' % (
-            abs(self.tf.translation.x - self.target_x), abs(self.tf.translation.y - self.target_y), a_diff))
- 
-    def get_pose(self):
-        try:
-            tf_stamped = self.tfBuffer.lookup_transform("map", "base_link", rospy.Time())
-            self.tf = tf_stamped.transform
-            self.print_pose_diff()
-        except (tf2.LookupException, tf2.ExtrapolationException):
-            pass
+import config
+import numpy as np
+import environment
+from hal import HAL
 
-    @staticmethod
-    def wrap_angle(angle):
-        """
-        Wrap angle to [-pi, pi)
-        :param angle: Angle to be wrapped
-        :return: wrapped angle
-        """
-        angle += pi
-        while angle < 0:
-            angle += 2*pi
-        return fmod(angle, 2*pi) - pi
- 
-    def compute_angle(self):
-        rot = self.tf.rotation
-        a_curr = PyKDL.Rotation.Quaternion(rot.x, rot.y, rot.z, rot.w).GetRPY()[2]
-        a_diff = self.wrap_angle(a_curr - self.target_a)
-        return self.target_a + a_diff
- 
-    def test_basic_localization(self):
-        global_localization = int(sys.argv[1])
-        self.target_x = float(sys.argv[2])
-        self.target_y = float(sys.argv[3])
-        self.target_a = self.wrap_angle(float(sys.argv[4]))
-        tolerance_d = float(sys.argv[5])
-        tolerance_a = float(sys.argv[6])
-        target_time = float(sys.argv[7])
- 
-        rospy.init_node('test', anonymous=True)
-        while rospy.rostime.get_time() == 0.0:
-            print('Waiting for initial time publication')
-            time.sleep(0.1)
- 
-        if global_localization == 1:
-            print('Waiting for service global_localization')
-            rospy.wait_for_service('global_localization')
-            global_localization = rospy.ServiceProxy('global_localization', Empty)
-            global_localization()
- 
-        start_time = rospy.rostime.get_time()
-        self.tfBuffer = tf2_ros.Buffer()
-        listener = tf2_ros.TransformListener(self.tfBuffer)
+robot_pos = None
 
-        while (rospy.rostime.get_time() - start_time) < target_time:
-            print('Waiting for end time %.6f (current: %.6f)' % (target_time, (rospy.rostime.get_time() - start_time)))
-            self.get_pose()
-            time.sleep(0.1)
 
-        print("Final pose:")
-        self.get_pose()
-        a_curr = self.compute_angle()
- 
-        self.assertNotEqual(self.tf, None)
-        self.assertAlmostEqual(self.tf.translation.x, self.target_x, delta=tolerance_d)
-        self.assertAlmostEqual(self.tf.translation.y, self.target_y, delta=tolerance_d)
-        self.assertAlmostEqual(a_curr, self.target_a, delta=tolerance_a)
- 
- 
-if __name__ == '__main__':
-    rostest.run('amcl', 'amcl_localization', TestBasicLocalization, sys.argv)
+distance_differences = []
+angle_differences = []
+
+class AMCL:
+    def __init__(self, no_particles=10, no_random_particles=0, localization=False):
+        self.no_particles = no_particles
+        self.no_random_particles = no_random_particles
+        self.localization = localization
+
+
+        self.hal = HAL()
+        global robot_pos
+        self.scene = 'scene-1'
+        self.scene = environment.Environment(self.scene, no_particles)
+        mm = self.scene.map
+        self.total_frames=None
+        self.show_particles=True
+        self.pose = self.hal.pose3d.getPose3d()
+        robot_pos = (self.pose.x, self.pose.y, self.pose.yaw)
+
+    def animate(self):
+        global robot_pos, distance_differences, angle_differences
+
+        teleport_pos, control = self.scene.get_control()
+
+        if teleport_pos:
+            robot_pos = teleport_pos
+        else:
+            robot_pos = (self.pose.x, self.pose.y, self.pose.yaw)
+
+            radar_src, radar_dest = self.scene.build_radar_beams(robot_pos) #Comentar, funcion que dibuja los rayos laser. Ya implementado en el sistema
+            # print("Posicion del radar_src", radar_src.shape) (2x11) (El mismo valor 11 veces)
+            # print("Posicion del radar_dest", radar_dest.shape) (2x11)
+            noise_free_measurements, _, radar_rays = self.scene.vraytracing(radar_src, radar_dest) #Comentar, me parece que traza las lineas de los rayos
+
+            noisy_measurements = noise_free_measurements + np.random.normal(0, config.RADAR_NOISE_STD, noise_free_measurements.shape[0])
+
+            if self.show_particles:
+                particle_positions, particle_velocities = self.scene.vperform_control(self.scene.particles, control)
+                #print("Llega hasta el vmeasurement_model")
+                is_weight_valid, important_weights = self.scene.vmeasurement_model(particle_positions, noisy_measurements)
+
+                if is_weight_valid:
+                    particle_resampling_indicies = np.random.choice(particle_positions.shape[0], particle_positions.shape[0], replace=True, p=important_weights)
+                    particle_resampling = particle_positions[particle_resampling_indicies]
+                else:
+                    particle_resampling = self.scene.uniform_sample_particles(self.no_particles)
+
+                self.scene.particles = particle_resampling
+
+                position_differences = self.scene.particles[:, :2] - np.array(robot_pos)[:2]
+
+                dists = np.sum(np.abs(position_differences) ** 2, axis=-1) ** (1. / 2)
+
+                distance_differences.append((np.mean(dists), np.std(dists)))
+
+                angle_diffs = (self.scene.particles[:, 2] - robot_pos[2]).reshape(-1, 1)
+                angle_diffs = np.hstack((angle_diffs, -angle_diffs)) % (2*np.pi)
+                angle_diffs = np.min(angle_diffs, axis=1)
+                angle_differences.append((np.mean(angle_diffs), np.std(angle_diffs)))
+
+                approximated_robot_x, approximated_robot_y = np.mean(self.scene.particles[:, 0]), np.mean(self.scene.particles[:, 1])
+
+            return approximated_robot_x, approximated_robot_y, self.scene.particles
+        #total_frames = self.scene.total_frames if total_frames is None else total_frames
+
+
+

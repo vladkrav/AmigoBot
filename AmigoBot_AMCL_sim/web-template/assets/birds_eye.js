@@ -7,7 +7,8 @@ var trail = [],
 	coords = [-1, -1];;
 
 // Complete draw function
-function draw(pos, contorno, laser_data, sonar_sensor_point, pos_vertices, laser_global){
+function draw(pos, contorno, laser_data, sonar_sensor_point, pos_vertices, laser_global,
+	approximated_robot_x, approximated_robot_y, particles){
 	mapCanvas.width = 769;
 	mapCanvas.height = 729;
 	
@@ -16,6 +17,7 @@ function draw(pos, contorno, laser_data, sonar_sensor_point, pos_vertices, laser
 	drawLaser(laser_data, laser_global);
 	drawAmigobot(pos, contorno);
 	drawSonar(sonar_sensor_point, pos_vertices);
+	drawAMCL(approximated_robot_x, approximated_robot_y, particles);
 }
 
 // Function to draw triangle
@@ -155,4 +157,16 @@ function drawSonar(sonar_sensor_point, pos_vertices){
 		ctx.closePath();
 		z++;
 	}
+}
+function drawAMCL(approximated_robot_x, approximated_robot_y, particles){
+	
+	for(let d of particles){
+		ctx.beginPath();
+		ctx.arc(d[0], d[1], 2, 0, 2 * Math.PI);
+		ctx.closePath();
+		ctx.strokeStyle = "#0000FF";
+		ctx.fillStyle = "#0000FF";
+	}
+	ctx.beginPath();
+	ctx.arc(approximated_robot_x, approximated_robot_y, 3, 0, 2 * Math.PI);
 }

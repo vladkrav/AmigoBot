@@ -7,7 +7,7 @@ import os
 
 class Config:
     def __init__(self):
-        with open('config_sim.json') as file:
+        with open('config_real.json') as file:
             self.config = json.load(file)
         self.pos_x = self.config['CONFIGURATION']['POS_X']
         self.pos_y = self.config['CONFIGURATION']['POS_Y']
@@ -38,7 +38,7 @@ class Config:
         # If the robot is the real, we need to enable the motors
         if(os.path.basename(file.name) == 'config_real.json'):
             self.topic_enable_motors = self.config['CONFIGURATION']['TOPIC_ENABLE_MOTORS']
-            self.msg = 0
+            self.msg = 1
             self.pub_motors = rospy.Publisher(self.topic_enable_motors, Int32, queue_size=1)
             self.pub_motors.publish(self.msg)
         else:

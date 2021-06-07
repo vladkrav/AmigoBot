@@ -1,8 +1,8 @@
 {
     "CONFIGURATION": {
-        "POS_X" : 14,
-        "POS_Y" : 14,
-        "ORIENTATION" : 90,
+        "POS_X" : 4,
+        "POS_Y" : 8,
+        "ORIENTATION" : 0,
         "MAX_VEL_V" : 0.75,
         "MAX_VEL_W" : 0.75,
         "TOPIC_POSE" : "/pose",
