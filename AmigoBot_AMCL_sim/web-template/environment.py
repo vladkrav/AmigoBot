@@ -3,8 +3,8 @@ import config
 import matplotlib.image as mpimg
 from scipy import signal
 from functools import partial
-from multiprocessing import Pool
-
+from multiprocess import Pool
+# import copyreg, copy, pickle
 
 
 from scipy import stats
@@ -19,57 +19,55 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:
 class Environment(object):
     def __init__(self, scene_name, no_particles=20):
 
-        self.scene_name = scene_name
-        self.no_particles = no_particles
+        self.scene_name = scene_name # Se guarda el nombre de la escena para cargar desde config.py
+        self.no_particles = no_particles # Se guarda el numero de particulas 
 
         map_name = 'scenes/%s.png' % config.SCENCES[self.scene_name]['map']
-        self.map = mpimg.imread(map_name)[::-1, :, 0]
+        self.map = mpimg.imread(map_name)[::-1, :, 0] # Se obtienen las dimensiones en px del mapa
         #print("Que es lo que tiene la variable self.map", self.map.shape)
-        mark = np.ones((config.ROBOT_DIAMETER, config.ROBOT_DIAMETER))
+        mark = np.ones((config.ROBOT_DIAMETER, config.ROBOT_DIAMETER)) # matriz de unos de 5x5 (radio del robot)
 
         self.convolve_mark = (signal.convolve2d(1-self.map[:, :], mark, mode='same', boundary='fill', fillvalue=0)) / np.sum(mark)
 
         self.convolve_mark_overlay = np.copy(self.map)
 
         threshold = 1/np.sum(mark)
-        self.convolve_mark_overlay[self.convolve_mark > threshold] = 0.2
+        self.convolve_mark_overlay[self.convolve_mark > threshold] = 0.3 # 0.2
 
         self.map_with_safe_boundary = np.copy(self.map)
         self.map_with_safe_boundary[self.convolve_mark > threshold] = 0.0 # zero is obstacle.
 
-        self.paths = config.SCENCES[scene_name]['paths']
+        self.paths = config.SCENCES[scene_name]['paths'] # Array de la ruta...no lo necesito ya que lo muevo yo
 
-        self.controls = [Environment._build_control(l) for l in self.paths]
+        self.controls = [Environment._build_control(l) for l in self.paths] # Se crea el control...no lo necesito ya que lo muevo yo
 
-        total_controls = np.sum([len(a) for a in self.controls])
-        logging.info('we have %d controls' % total_controls)
+        total_controls = np.sum([len(a) for a in self.controls]) # Numero total de controles...no lo necesito
+        #logging.info('we have %d controls' % total_controls)
 
-        if len(self.paths) > 1:
+        if len(self.paths) > 1: # como no tengo el control del robot...esto ya no se necesita tampoco...
             self.kidnapping_occur_at = len(self.controls[0])
         else:
             self.kidnapping_occur_at = None
 
-        self.total_frames = (len(self.paths) - 1) + total_controls
+        self.total_frames = (len(self.paths) - 1) + total_controls # Numero de iteraciones...no lo necesito...iterar siempre
 
-        self.no_sensors = config.SYSTEM_NO_SENSORS
+        self.no_sensors = config.SYSTEM_NO_SENSORS # Numero de rayos laser
         self.radar_thetas = (np.arange(0, self.no_sensors) - self.no_sensors // 2)*(np.pi/self.no_sensors)
 
-
-        self.traversable_area = np.stack(np.nonzero(1 - (self.map_with_safe_boundary.T < 0.7)), axis=1)
-
-        self.particles = self.uniform_sample_particles(self.no_particles)
-        #print("El valor de self.particles es: ",self.particles.shape)
+        # Area transitable #0.7
+        self.traversable_area = np.stack(np.nonzero(1 - (self.map_with_safe_boundary.T < 0.6)), axis=1)
+        self.particles = self.uniform_sample_particles(self.no_particles) # realiza la ubicacion de las particulas
+        
         self.control_group_idx = 0
         self.state_idx = 0
 
         self.total_move = 0
 
         self._vmeasurement_model_p_hit = np.vectorize(self._measurement_model_p_hit)
-
+    # Distribuye uniformemente por el mapa las particulas
     def uniform_sample_particles(self, no_particles):
         particles_xy_indices = np.random.choice(self.traversable_area.shape[0], size=no_particles, replace=True)
         particles_xy = self.traversable_area[particles_xy_indices]
-
         particles_theta = np.random.uniform(0.0, 2*np.pi, (no_particles, 1)) % (2*np.pi)
 
         res = np.hstack([particles_xy, particles_theta])
@@ -78,10 +76,10 @@ class Environment(object):
     def get_control(self):
         self.total_move = self.total_move + 1
 
-        logging.info('path %d' % self.control_group_idx)
+        #logging.info('path %d' % self.control_group_idx)
 
         if self.state_idx >= len(self.controls[self.control_group_idx]):
-            logging.info('..........')
+            #logging.info('..........')
             self.control_group_idx = self.control_group_idx + 1
             self.state_idx = 0
             teleport_pos = self.paths[self.control_group_idx][0]
@@ -120,19 +118,20 @@ class Environment(object):
             ntheta
         )
 
-        logging.debug('-------')
-        logging.debug('control')
-        logging.debug(control)
-        logging.debug('v')
-        logging.debug(v)
-        logging.debug('old state')
-        logging.debug(pos)
-        logging.debug("new state")
-        logging.debug(new_state)
+        # logging.debug('-------')
+        # logging.debug('control')
+        # logging.debug(control)
+        # logging.debug('v')
+        # logging.debug(v)
+        # logging.debug('old state')
+        # logging.debug(pos)
+        # logging.debug("new state")
+        # logging.debug(new_state)
 
         return new_state, v
 
     def vperform_control(self, vpos, control):
+        print("Cual es la dimension de vpos.shape\n",vpos.shape, "\n")
         new_state, new_v = np.zeros(vpos.shape), np.zeros((vpos.shape[0], 2))
 
         for i in range(vpos.shape[0]):
@@ -141,7 +140,7 @@ class Environment(object):
         return new_state, new_v
 
     def raytracing(self, src, dest, num_samples=10):
-        logging.debug('src %s -> dest %s ' % (','.join(src.astype(str)), ','.join(dest.astype(str))))
+        #logging.debug('src %s -> dest %s ' % (','.join(src.astype(str)), ','.join(dest.astype(str))))
 
         dx = np.where(src[0] < dest[0], 1, -1)
         dy = np.where(src[1] < dest[1], 1, -1)
@@ -160,7 +159,7 @@ class Environment(object):
             collisions = np.nonzero(collided_map)
             pos = collisions[0][0]
             position = np.array((x_steps[pos], y_steps[pos]))
-            logging.debug('    collided pos %s' % ','.join(position.astype(str)))
+            #logging.debug('    collided pos %s' % ','.join(position.astype(str)))
             distance = np.linalg.norm([position[0] - src[0], position[1] - src[1]])
         else:
             position = dest
@@ -170,8 +169,8 @@ class Environment(object):
             (position[0] - src[0]),
             (position[1] - src[1]),
         ]
-        logging.debug('  position %s' % ','.join(np.array(position).astype(str)))
-        logging.debug('  rel position %s' % ','.join(np.array(rel_position).astype(str)))
+        #logging.debug('  position %s' % ','.join(np.array(position).astype(str)))
+        #logging.debug('  rel position %s' % ','.join(np.array(rel_position).astype(str)))
 
         return distance, position, rel_position
 
@@ -221,14 +220,15 @@ class Environment(object):
 
         positions = positions.tolist()
 
-        with Pool(10) as p:
-            weights = p.map(mm, positions)
+        p = Pool(10)
+        #with Pool(10) as p:
+        weights = p.map(mm, positions)
 
         weights = np.array(weights)
         total_weights = np.sum(weights)
 
         if total_weights == 0:
-            logging.debug('all weights are zero')
+            #logging.debug('all weights are zero')
             return False, None
         else:
             return True, weights / total_weights

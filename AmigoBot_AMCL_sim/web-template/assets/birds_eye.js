@@ -159,14 +159,23 @@ function drawSonar(sonar_sensor_point, pos_vertices){
 	}
 }
 function drawAMCL(approximated_robot_x, approximated_robot_y, particles){
-	
+	// alert(`[close] Connection closed cleanly, code=${particles}`);
+	// alert(`[close] Connection closed cleanly, code=${approximated_robot_x}`);
+	// alert(`[close] Connection closed cleanly, code=${approximated_robot_y}`);
 	for(let d of particles){
 		ctx.beginPath();
-		ctx.arc(d[0], d[1], 2, 0, 2 * Math.PI);
-		ctx.closePath();
 		ctx.strokeStyle = "#0000FF";
 		ctx.fillStyle = "#0000FF";
+		ctx.arc(d[0], d[1], 2, 0, 2 * Math.PI);
+		ctx.stroke();
+		ctx.fill();
+		ctx.closePath();
 	}
 	ctx.beginPath();
-	ctx.arc(approximated_robot_x, approximated_robot_y, 3, 0, 2 * Math.PI);
+	ctx.strokeStyle = "#0000FF";
+	ctx.fillStyle = "#0000FF";
+	ctx.arc(approximated_robot_x, approximated_robot_y, 10, 0, 2 * Math.PI);
+	ctx.stroke();
+	ctx.fill();
+	ctx.closePath();
 }

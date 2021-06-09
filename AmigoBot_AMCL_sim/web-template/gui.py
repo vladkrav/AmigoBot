@@ -48,7 +48,7 @@ class GUI:
         pose3d_object = ListenerPose3d("/robot0/odom")
         laser_object = ListenerLaser("/robot0/laser_1")
         self.map = Map(laser_object, pose3d_object)
-        self.amcl = AMCL(10,0,False)
+        self.amcl = AMCL(30,0,False)
 
     # Explicit initialization function
     # Class method, so user can call it without instantiation
@@ -86,7 +86,7 @@ class GUI:
         self.payload["pos_vertices"], self.payload["sonar_sensor"] = self.map.setSonarValues()
         self.payload["laser"], self.payload["laser_global"] = self.map.setLaserValues()
         # Payload AMCL Message
-        self.payload["approximated_robot_x"], self.payload["approximated_robot_y"], self.payload["particles"] = self.amcl.animate()
+        self.payload["approximated_robot_x"], self.payload["approximated_robot_y"], self.payload["particles"] = self.amcl.animate(self.payload["laser"], self.payload["robot_coord"])
         # Payload Console Messages
         message_buffer = self.console.get_text_to_be_displayed()
         self.payload["text_buffer"] = str(message_buffer)

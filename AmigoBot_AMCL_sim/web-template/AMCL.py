@@ -1,9 +1,11 @@
 import config
 import numpy as np
 import environment
+import math
 from hal import HAL
 from map import Map
-
+from interfaces.pose3d import ListenerPose3d
+from interfaces.laser import ListenerLaser
 current_robot_pos = []
 prev_robot_pos = [0, 0, 0]
 
@@ -12,35 +14,41 @@ distance_differences = []
 angle_differences = []
 
 class AMCL:
-    def __init__(self, no_particles=10, no_random_particles=0, localization=False):
+    def __init__(self, no_particles=15, no_random_particles=0, localization=False):
         global current_robot_pos, prev_robot_pos
 
         self.no_particles = no_particles
         self.no_random_particles = no_random_particles
         self.localization = localization
-        self.map = Map.setLaserValues()
+        pose3d_object = ListenerPose3d("/robot0/odom")
+        laser_object = ListenerLaser("/robot0/laser_1")
+        self.map = Map(laser_object, pose3d_object)
         self.hal = HAL()
         self.scene = 'scene-1'
-        self.scene = environment.Environment(self.scene, no_particles)
+        self.scene = environment.Environment(self.scene, no_particles=self.no_particles)
         mm = self.scene.map
         self.total_frames=None
         self.show_particles=True
         self.pose = self.hal.pose3d.getPose3d()
         current_robot_pos = (self.pose.x, self.pose.y, self.pose.yaw)
 
-    def animate(self):
+    def animate(self, laser_beam, radar_src):
         global current_robot_pos, prev_robot_pos, distance_differences, angle_differences
-
-        control = current_robot_pos - prev_robot_pos
-
+        distance = []
+        #control = (current_robot_pos[0] - prev_robot_pos[0], current_robot_pos[1] - prev_robot_pos[1], current_robot_pos[2] - prev_robot_pos[2])
+        control = (0,0,0)
         robot_pos = (self.pose.x, self.pose.y, self.pose.yaw)
 
         #radar_src, radar_dest = self.scene.build_radar_beams(robot_pos) #Comentar, funcion que dibuja los rayos laser. Ya implementado en el sistema
         # print("Posicion del radar_src", radar_src.shape) (2x11) (El mismo valor 11 veces)
         # print("Posicion del radar_dest", radar_dest.shape) (2x11)
-        #noise_free_measurements, _, radar_rays = self.scene.vraytracing(radar_src, radar_dest) #Comentar, me parece que traza las lineas de los rayos
-        noise_free_measurements, _ = self.map
-        noisy_measurements = noise_free_measurements + np.random.normal(0, config.RADAR_NOISE_STD, noise_free_measurements.shape[0])
+        for i, point in enumerate(laser_beam):
+            distance.append((0,0))
+            distance[i] = math.sqrt((point[0] - radar_src[0])**2 + (point[1] - radar_src[1])**2)
+        #noise_free_measurements, _, radar_rays = self.scene.vraytracing(np.array(radar_src), np.array(laser_beam)) #Comentar, me parece que traza las lineas de los rayos
+        #print("noise_free_measurements", len(noise_free_measurements))
+        noise_free_measurements = distance
+        noisy_measurements = noise_free_measurements + np.random.normal(0, config.RADAR_NOISE_STD, len(noise_free_measurements))
 
         if self.show_particles:
             particle_positions, particle_velocities = self.scene.vperform_control(self.scene.particles, control)
@@ -68,7 +76,9 @@ class AMCL:
 
             approximated_robot_x, approximated_robot_y = np.mean(self.scene.particles[:, 0]), np.mean(self.scene.particles[:, 1])
         prev_robot_pos = current_robot_pos
-        return approximated_robot_x, approximated_robot_y, self.scene.particles
+        #print("Que es lo que devuelven estas particulas: \n", np.array(particle_positions).tolist(), "\n")
+        #print("Que es lo que devuelven estas self.scene.particles: \n", np.array(self.scene.particles).tolist(), "\n")
+        return np.array(approximated_robot_x).tolist(), np.array(approximated_robot_y).tolist(), np.array(particle_positions).tolist()
         #total_frames = self.scene.total_frames if total_frames is None else total_frames
 
 
