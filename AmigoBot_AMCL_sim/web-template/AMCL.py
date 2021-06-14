@@ -46,8 +46,9 @@ class AMCL:
             distance.append((0,0))
             distance[i] = math.sqrt((point[0] - radar_src[0])**2 + (point[1] - radar_src[1])**2)
         #noise_free_measurements, _, radar_rays = self.scene.vraytracing(np.array(radar_src), np.array(laser_beam)) #Comentar, me parece que traza las lineas de los rayos
-        #print("noise_free_measurements", len(noise_free_measurements))
+        
         noise_free_measurements = distance
+        # print("noise_free_measurements", noise_free_measurements)
         noisy_measurements = noise_free_measurements + np.random.normal(0, config.RADAR_NOISE_STD, len(noise_free_measurements))
 
         if self.show_particles:
