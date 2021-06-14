@@ -23,15 +23,17 @@ class Environment(object):
 
         map_name = 'scenes/%s.png' % config.SCENCES[self.scene_name]['map']
         self.map = mpimg.imread(map_name)[::-1, :, 0] # Se obtienen las dimensiones en px del mapa
-        #print("Que es lo que tiene la variable self.map", self.map.shape)
+        # print("Que es lo que tiene la variable self.map", self.map[350]) # 1 indica que la posicion esta libre un 0 que esta ocupada y un 0.49803922 que no se conoce
         mark = np.ones((config.ROBOT_DIAMETER, config.ROBOT_DIAMETER)) # matriz de unos de 5x5 (radio del robot)
 
         self.convolve_mark = (signal.convolve2d(1-self.map[:, :], mark, mode='same', boundary='fill', fillvalue=0)) / np.sum(mark)
-
+        print("cuanto es el self.convolve_mark\n", self.convolve_mark[133][266], "\n")
         self.convolve_mark_overlay = np.copy(self.map)
 
         threshold = 1/np.sum(mark)
-        self.convolve_mark_overlay[self.convolve_mark > threshold] = 0.3 # 0.2
+        # print("cuanto es el threshold\n", threshold, "\n")
+        self.convolve_mark_overlay[self.convolve_mark > threshold] = 0.2 # 0.2
+        # print("Que es self.convolve_mark_overlay\n", self.convolve_mark_overlay, "\n")
 
         self.map_with_safe_boundary = np.copy(self.map)
         self.map_with_safe_boundary[self.convolve_mark > threshold] = 0.0 # zero is obstacle.
@@ -54,7 +56,7 @@ class Environment(object):
         self.radar_thetas = (np.arange(0, self.no_sensors) - self.no_sensors // 2)*(np.pi/self.no_sensors)
 
         # Area transitable #0.7
-        self.traversable_area = np.stack(np.nonzero(1 - (self.map_with_safe_boundary.T < 0.6)), axis=1)
+        self.traversable_area = np.stack(np.nonzero(1 - (self.map_with_safe_boundary.T < 1)), axis=1)
         self.particles = self.uniform_sample_particles(self.no_particles) # realiza la ubicacion de las particulas
         
         self.control_group_idx = 0
