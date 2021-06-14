@@ -4,7 +4,6 @@ import matplotlib.image as mpimg
 from scipy import signal
 from functools import partial
 from multiprocess import Pool
-# import copyreg, copy, pickle
 
 
 from scipy import stats
