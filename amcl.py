@@ -72,8 +72,8 @@ def animate(self, laser_beam, radar_src):
     prev_robot_pos = current_robot_pos
     return np.array(approximated_robot_x).tolist(), np.array(approximated_robot_y).tolist(), np.array(particle_positions).tolist()
 
-def uniform_sample_particles(self, no_particles):
-    particles_xy_indices = np.random.choice(self.traversable_area.shape[0], size=no_particles, replace=True)
+def uniform_sample_particles(self, no_particles, traversable_area):
+    particles_xy_indices = np.random.choice(traversable_area.shape[0], size=no_particles, replace=True)
     particles_xy = self.traversable_area[particles_xy_indices]
     particles_theta = np.random.uniform(0.0, 2*np.pi, (no_particles, 1)) % (2*np.pi)
 
