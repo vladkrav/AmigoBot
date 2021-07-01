@@ -14,10 +14,10 @@ function draw(pos, contorno, laser_data, sonar_sensor_point, pos_vertices, laser
 	
 	// clearMap();
 	// drawTrail(coords[0], coords[1]);
-	drawAMCL(approximated_robot_pose, particles);
 	drawLaser(laser_data, laser_global);
 	drawAmigobot(pos, contorno);
 	drawSonar(sonar_sensor_point, pos_vertices);
+	drawAMCL(approximated_robot_pose, particles);
 	
 }
 
@@ -172,7 +172,7 @@ function drawAMCL(approximated_robot_pose, particles){
 	ctx.beginPath();
 	ctx.strokeStyle = "#000000";
 	ctx.fillStyle = "#0000FF";
-	ctx.arc(approximated_robot_pose[0], approximated_robot_pose[1], 8, 0, 2 * Math.PI);
+	ctx.arc(approximated_robot_pose[0], 729 - approximated_robot_pose[1], 8, 0, 2 * Math.PI);
 	ctx.stroke();
 	ctx.fill();
 	ctx.closePath();

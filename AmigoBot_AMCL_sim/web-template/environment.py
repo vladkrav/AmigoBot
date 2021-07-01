@@ -19,7 +19,7 @@ class Environment(object):
     def __init__(self, scene_name, no_particles=20):
 
         self.scene_name = scene_name # Se guarda el nombre de la escena para cargar desde config.py
-        self.no_particles = no_particles # Se guarda el numero de particulas 
+        # self.no_particles = no_particles # Se guarda el numero de particulas 
 
         map_name = 'scenes/%s.png' % config.SCENCES[self.scene_name]['map']
         self.map = mpimg.imread(map_name)[::-1, :, 0] # Se obtienen las dimensiones en px del mapa
@@ -27,7 +27,7 @@ class Environment(object):
         mark = np.ones((config.ROBOT_DIAMETER, config.ROBOT_DIAMETER)) # matriz de unos de 5x5 (radio del robot)
 
         self.convolve_mark = (signal.convolve2d(1-self.map[:, :], mark, mode='same', boundary='fill', fillvalue=0)) / np.sum(mark)
-        print("cuanto es el self.convolve_mark\n", self.convolve_mark[133][266], "\n")
+        # print("cuanto es el self.convolve_mark\n", self.convolve_mark[133][266], "\n")
         self.convolve_mark_overlay = np.copy(self.map)
 
         threshold = 1/np.sum(mark)
@@ -38,31 +38,31 @@ class Environment(object):
         self.map_with_safe_boundary = np.copy(self.map)
         self.map_with_safe_boundary[self.convolve_mark > threshold] = 0.0 # zero is obstacle.
 
-        self.paths = config.SCENCES[scene_name]['paths'] # Array de la ruta...no lo necesito ya que lo muevo yo
+        # self.paths = config.SCENCES[scene_name]['paths'] # Array de la ruta...no lo necesito ya que lo muevo yo
 
-        self.controls = [Environment._build_control(l) for l in self.paths] # Se crea el control...no lo necesito ya que lo muevo yo
+        # self.controls = [Environment._build_control(l) for l in self.paths] # Se crea el control...no lo necesito ya que lo muevo yo
 
-        total_controls = np.sum([len(a) for a in self.controls]) # Numero total de controles...no lo necesito
+        # total_controls = np.sum([len(a) for a in self.controls]) # Numero total de controles...no lo necesito
         #logging.info('we have %d controls' % total_controls)
 
-        if len(self.paths) > 1: # como no tengo el control del robot...esto ya no se necesita tampoco...
-            self.kidnapping_occur_at = len(self.controls[0])
-        else:
-            self.kidnapping_occur_at = None
+        # if len(self.paths) > 1: # como no tengo el control del robot...esto ya no se necesita tampoco...
+        #     self.kidnapping_occur_at = len(self.controls[0])
+        # else:
+        #     self.kidnapping_occur_at = None
 
-        self.total_frames = (len(self.paths) - 1) + total_controls # Numero de iteraciones...no lo necesito...iterar siempre
+        # self.total_frames = (len(self.paths) - 1) + total_controls # Numero de iteraciones...no lo necesito...iterar siempre
 
         self.no_sensors = config.SYSTEM_NO_SENSORS # Numero de rayos laser
         self.radar_thetas = (np.arange(0, self.no_sensors) - self.no_sensors // 2)*(np.pi/self.no_sensors)
 
         # Area transitable #0.7
-        self.traversable_area = np.stack(np.nonzero(1 - (self.map_with_safe_boundary.T < 1)), axis=1)
-        self.particles = self.uniform_sample_particles(self.no_particles) # realiza la ubicacion de las particulas
+        # self.traversable_area = np.stack(np.nonzero(1 - (self.map_with_safe_boundary.T < 1)), axis=1)
+        # self.particles = self.uniform_sample_particles(self.no_particles) # realiza la ubicacion de las particulas
         
-        self.control_group_idx = 0
-        self.state_idx = 0
+        # self.control_group_idx = 0
+        # self.state_idx = 0
 
-        self.total_move = 0
+        # self.total_move = 0
 
         self._vmeasurement_model_p_hit = np.vectorize(self._measurement_model_p_hit)
     # Distribuye uniformemente por el mapa las particulas
@@ -119,20 +119,10 @@ class Environment(object):
             ntheta
         )
 
-        # logging.debug('-------')
-        # logging.debug('control')
-        # logging.debug(control)
-        # logging.debug('v')
-        # logging.debug(v)
-        # logging.debug('old state')
-        # logging.debug(pos)
-        # logging.debug("new state")
-        # logging.debug(new_state)
-
         return new_state, v
 
     def vperform_control(self, vpos, control):
-        print("Cual es la dimension de vpos.shape\n",vpos.shape, "\n")
+        # print("Cual es la dimension de vpos.shape\n",vpos.shape, "\n")
         new_state, new_v = np.zeros(vpos.shape), np.zeros((vpos.shape[0], 2))
 
         for i in range(vpos.shape[0]):
@@ -203,15 +193,15 @@ class Environment(object):
 
         return radar_src, radar_dest
 
-    def measurement_model(self, pos, observed_measurements):
+    def measurement_model(self, pos, observed_measurements, noise_free_measurements):
         if self.map_with_safe_boundary[int(pos[1]), int(pos[0])] < config.SYSTEM_MAP_OCCUPIED_AREA_THRESHOLD:
             return 0.0
 
-        radar_src, radar_dest = self.build_radar_beams(pos)
-        noise_free_measurements, _, radar_rays = self.vraytracing(radar_src, radar_dest)
+        # radar_src, radar_dest = self.build_radar_beams(pos)
+        # noise_free_measurements, _, radar_rays = self.vraytracing(radar_src, radar_dest)
 
         particle_measurements = noise_free_measurements
-
+        # print("O esto es lo que tarda tanto")
         qs = self._vmeasurement_model_p_hit(observed_measurements, particle_measurements)
 
         return np.prod(qs)
