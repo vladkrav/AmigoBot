@@ -193,18 +193,20 @@ class Environment(object):
 
         return radar_src, radar_dest
 
-    def measurement_model(self, pos, observed_measurements, noise_free_measurements):
+    def measurement_model(self, pos, observed_measurements):
         if self.map_with_safe_boundary[int(pos[1]), int(pos[0])] < config.SYSTEM_MAP_OCCUPIED_AREA_THRESHOLD:
+            print("Entra aqui alguna vez?")
             return 0.0
 
-        # radar_src, radar_dest = self.build_radar_beams(pos)
-        # noise_free_measurements, _, radar_rays = self.vraytracing(radar_src, radar_dest)
+        radar_src, radar_dest = self.build_radar_beams(pos)
+        noise_free_measurements, _, radar_rays = self.vraytracing(radar_src, radar_dest)
 
         particle_measurements = noise_free_measurements
         # print("O esto es lo que tarda tanto")
         qs = self._vmeasurement_model_p_hit(observed_measurements, particle_measurements)
-
-        return np.prod(qs)
+        # print("Que es lo que devuelve qs", qs)
+        # print("el producto de todo es", np.mean(qs))
+        return np.mean(qs)
 
     def vmeasurement_model(self, positions, observed_measurements):
         mm = partial(self.measurement_model, observed_measurements=observed_measurements)
@@ -219,7 +221,6 @@ class Environment(object):
         total_weights = np.sum(weights)
 
         if total_weights == 0:
-            #logging.debug('all weights are zero')
             return False, None
         else:
             return True, weights / total_weights
@@ -230,7 +231,7 @@ class Environment(object):
         dd = np.concatenate([config.SYSTEM_MC_GRIDS, [z]])
 
         prob = stats.norm.pdf(dd, loc=z_star, scale=config.SYSTEM_MEASURE_MODEL_LOCAL_NOISE_STD)
-
+        # print("QUe es lo que devuelve prob", prob)
         normalizers = np.sum(prob[:-1])
 
         return prob[-1] / normalizers

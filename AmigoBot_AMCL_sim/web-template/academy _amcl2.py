@@ -13,7 +13,7 @@ from environment import Environment
 
 
 ROBOT_DIAMETER = 5
-no_particles = 10
+no_particles = 50
 no_random_particles = 5000
 type_localization = True
 show_particles = True
@@ -35,13 +35,12 @@ particles_xy_indices = np.random.choice(traversable_area.shape[0], size=no_parti
 particles_xy = traversable_area[particles_xy_indices]
 particles_theta = np.random.uniform(0.0, 2*np.pi, (no_particles, 1)) % (2*np.pi)
 particles = np.hstack([particles_xy, particles_theta])
-
 # Se muestran las particulas generadas
 GUI.showParticles(np.array(particles).tolist())
 
 # Se obtiene la posición inicial del robot 
-aux_pos_x = HAL.getPose3d().x
-aux_pos_y = HAL.getPose3d().y
+aux_pos_x = HAL.getPose3d().x / 0.03
+aux_pos_y = HAL.getPose3d().y / 0.03
 aux_pos_yaw = HAL.getPose3d().yaw
 
 noise = True
@@ -52,30 +51,22 @@ radar_thetas = (np.arange(0, no_sensors) - no_sensors // 2)*(np.pi/no_sensors)
 env = Environment(scene, 20)
 while True:
     # Enter iterative code!
-    distance = math.sqrt((HAL.getPose3d().x - aux_pos_x)**2 + (HAL.getPose3d().y - aux_pos_y)**2)
+    distance = math.sqrt((HAL.getPose3d().x / 0.03 - aux_pos_x)**2 + (HAL.getPose3d().y / 0.03- aux_pos_y)**2)
     distance_yaw = abs(aux_pos_yaw - HAL.getPose3d().yaw)
     # Si se ha recorrido una distancia mayor actualizar o se ha girado mas de 30 grados
-    if(distance >= 1 or distance_yaw >= math.pi/6):
+    # if(distance >= 1 or distance_yaw >= math.pi/6):
+    if(distance >= 1):
+        # Este ha sido el movimiento del robot, se debe aplicar el modelo de movimiento a las particulas
+        control = (HAL.getPose3d().x / 0.03 - aux_pos_x, HAL.getPose3d().y / 0.03 - aux_pos_y, HAL.getPose3d().yaw - aux_pos_yaw)
         # Se actualiza la posicion inicial
-        aux_pos_x = HAL.getPose3d().x
-        aux_pos_y = HAL.getPose3d().y
+        aux_pos_x = HAL.getPose3d().x / 0.03
+        aux_pos_y = HAL.getPose3d().y / 0.03
         aux_pos_yaw = HAL.getPose3d().yaw
         # Se guarda en un array la posicion
         robot_pos = ((aux_pos_x, aux_pos_y, aux_pos_yaw))
-        
-        # Se vuelve a repetir la generacion de las particulas 
-        particles_xy_indices = np.random.choice(traversable_area.shape[0], size=no_particles, replace=True)
-        particles_xy = traversable_area[particles_xy_indices]
-        particles_theta = np.random.uniform(0.0, 2*np.pi, (no_particles, 1)) % (2*np.pi)
-        particles = np.hstack([particles_xy, particles_theta])
-        new_particles = np.array(particles).tolist()
-        GUI.showParticles(new_particles)
 
-        # Este ha sido el movimiento del robot, se debe aplicar el modelo de movimiento a las particulas
-        control = (HAL.getPose3d().x - aux_pos_x, HAL.getPose3d().y - aux_pos_y, HAL.getPose3d().yaw - aux_pos_yaw)
-        
         if(noise == True):
-            noise_free_measurements = HAL.getLaserData().values
+            noise_free_measurements = np.array(HAL.getLaserData().values) / 0.03
             noisy_measurements = noise_free_measurements + np.random.normal(0, config.RADAR_NOISE_STD, len(noise_free_measurements))
         
         if(show_particles == True):
@@ -112,22 +103,29 @@ while True:
                 #particle_positions and particle_velocities
                 new_state[i] = new_state_p
                 new_v[i] = v
-
-            mm = partial(env.measurement_model, noisy_measurements, noise_free_measurements)
+            # console.print(new_state)
+            # console.print(noisy_measurements)
+            # mm = partial(env.measurement_model, noisy_measurements, noise_free_measurements)
+            mm = partial(env.measurement_model, observed_measurements=noisy_measurements)
             positions = new_state.tolist()
-            p = Pool(100)
+            p = Pool(10)
             weights = p.map(mm, positions)
             weights = np.array(weights)
             total_weights = np.sum(weights)
+            # console.print(total_weights)
             if total_weights == 0:
                 is_weight_valid = False
+                # console.print("no hay pesos")
             else:
+                # console.print("Si hay pesos")
                 is_weight_valid = True
                 important_weights = weights / total_weights
             # En este paso se realiza el remuestreo de las particulas
             if(is_weight_valid):
                 particle_resampling_indicies = np.random.choice(new_state.shape[0], new_state.shape[0], replace=True, p=important_weights)
                 particle_resampling = new_state[particle_resampling_indicies]
+                GUI.showParticles(particle_resampling.tolist())
+                # console.print("Entra aqui")
             else:
                 particles_xy_indices = np.random.choice(traversable_area.shape[0], size=no_particles, replace=True)
                 particles_xy = traversable_area[particles_xy_indices]
