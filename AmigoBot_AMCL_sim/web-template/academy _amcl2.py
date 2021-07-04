@@ -103,9 +103,6 @@ while True:
                 #particle_positions and particle_velocities
                 new_state[i] = new_state_p
                 new_v[i] = v
-            # console.print(new_state)
-            # console.print(noisy_measurements)
-            # mm = partial(env.measurement_model, noisy_measurements, noise_free_measurements)
             mm = partial(env.measurement_model, observed_measurements=noisy_measurements)
             positions = new_state.tolist()
             p = Pool(10)
