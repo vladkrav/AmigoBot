@@ -122,6 +122,7 @@ while True:
                 important_weights = weights / total_weights
             # En este paso se realiza el remuestreo de las particulas
             if(is_weight_valid):
+                # Dentro del array new_state (x?), del tamaño del array, se pueden repetir los valores, con una probabilidad dada por important_weights
                 particle_resampling_indicies = np.random.choice(new_state.shape[0], new_state.shape[0], replace=True, p=important_weights)
                 particle_resampling = new_state[particle_resampling_indicies]
                 GUI.showParticles(particle_resampling.tolist())

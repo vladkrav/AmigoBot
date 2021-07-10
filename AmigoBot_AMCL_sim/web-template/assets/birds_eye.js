@@ -165,6 +165,12 @@ function drawAMCL(approximated_robot_pose, particles){
 		ctx.strokeStyle = "#000000";
 		ctx.fillStyle = "#0000FF";
 		ctx.arc(d[0], 729 - d[1], 2, 0, 2 * Math.PI);
+		// ctx.stroke();
+		// ctx.fill();
+		px1 = d[0] + 2 * Math.cos(d[2]);
+		py1 = posy - 2 * Math.sin(d[2]);
+		ctx.moveTo(d[0],d[1])
+		ctx.lineTo(px1,py1)
 		ctx.stroke();
 		ctx.fill();
 		ctx.closePath();

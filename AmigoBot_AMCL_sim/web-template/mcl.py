@@ -163,6 +163,7 @@ while True:
             new_particles = np.array(particles).tolist()
             # console.print(new_particles)
             GUI.showParticles(new_particles)
+            
             #Ahora se calculan los pesos de las particulas
             total_weight = 0.0
             norm_coef = 1.0 / (math.sqrt(2.0 * PI * measurement_variance))
