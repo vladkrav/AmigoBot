@@ -122,7 +122,6 @@ class Environment(object):
         return new_state, v
 
     def vperform_control(self, vpos, control):
-        # print("Cual es la dimension de vpos.shape\n",vpos.shape, "\n")
         new_state, new_v = np.zeros(vpos.shape), np.zeros((vpos.shape[0], 2))
 
         for i in range(vpos.shape[0]):
@@ -131,7 +130,6 @@ class Environment(object):
         return new_state, new_v
 
     def raytracing(self, src, dest, num_samples=10):
-        #logging.debug('src %s -> dest %s ' % (','.join(src.astype(str)), ','.join(dest.astype(str))))
 
         dx = np.where(src[0] < dest[0], 1, -1)
         dy = np.where(src[1] < dest[1], 1, -1)
@@ -150,7 +148,6 @@ class Environment(object):
             collisions = np.nonzero(collided_map)
             pos = collisions[0][0]
             position = np.array((x_steps[pos], y_steps[pos]))
-            #logging.debug('    collided pos %s' % ','.join(position.astype(str)))
             distance = np.linalg.norm([position[0] - src[0], position[1] - src[1]])
         else:
             position = dest
@@ -160,8 +157,6 @@ class Environment(object):
             (position[0] - src[0]),
             (position[1] - src[1]),
         ]
-        #logging.debug('  position %s' % ','.join(np.array(position).astype(str)))
-        #logging.debug('  rel position %s' % ','.join(np.array(rel_position).astype(str)))
 
         return distance, position, rel_position
 
@@ -195,17 +190,14 @@ class Environment(object):
 
     def measurement_model(self, pos, observed_measurements):
         if self.map_with_safe_boundary[int(pos[1]), int(pos[0])] < config.SYSTEM_MAP_OCCUPIED_AREA_THRESHOLD:
-            print("Entra aqui alguna vez?")
             return 0.0
 
         radar_src, radar_dest = self.build_radar_beams(pos)
         noise_free_measurements, _, radar_rays = self.vraytracing(radar_src, radar_dest)
 
         particle_measurements = noise_free_measurements
-        # print("O esto es lo que tarda tanto")
         qs = self._vmeasurement_model_p_hit(observed_measurements, particle_measurements)
-        # print("Que es lo que devuelve qs", qs)
-        # print("el producto de todo es", np.mean(qs))
+
         return np.mean(qs)
 
     def vmeasurement_model(self, positions, observed_measurements):
@@ -214,7 +206,6 @@ class Environment(object):
         positions = positions.tolist()
 
         p = Pool(10)
-        #with Pool(10) as p:
         weights = p.map(mm, positions)
 
         weights = np.array(weights)
@@ -231,7 +222,6 @@ class Environment(object):
         dd = np.concatenate([config.SYSTEM_MC_GRIDS, [z]])
 
         prob = stats.norm.pdf(dd, loc=z_star, scale=config.SYSTEM_MEASURE_MODEL_LOCAL_NOISE_STD)
-        # print("QUe es lo que devuelve prob", prob)
         normalizers = np.sum(prob[:-1])
 
         return prob[-1] / normalizers

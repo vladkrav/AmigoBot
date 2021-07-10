@@ -85,7 +85,7 @@ PI2 = 6.28318530718
 # landmarks.append([2.0, 2.0])
 var_x = 100
 var_y = 100
-var_yaw = 2.0 * math.pi / 180.0
+var_yaw = 0.523598775
 # Se generan las primeras partículas aleatoriamente alrededor del punto incial del robot
 wo = 1.0 / float(particle_num)
 for i in range(particle_num):
@@ -96,6 +96,8 @@ for i in range(particle_num):
         yaw += PI2
     while yaw > PI:
         yaw -= PI2
+    console.print("Que pasa con el angulo")
+    console.print(yaw)
     particles.append((x, y, yaw, wo))
 particles = np.array(particles).tolist()
 # console.print(particles)
@@ -111,8 +113,9 @@ while True:
     #Se obtiene la distancia recorrida desde la posicion inicial
     delta_dist = math.sqrt((HAL.getPose3d().x / 0.03 - aux_pos_x)**2 + (( HAL.getPose3d().y / 0.03) - aux_pos_y)**2)
     delta_yaw = abs(aux_pos_yaw - HAL.getPose3d().yaw)
-
-    if(delta_dist > 1 or delta_yaw > math.pi/6):
+    # console.print("el valor de delta_dist es:")
+    # console.print(delta_dist)
+    if(delta_dist > 1 / 0.03 or delta_yaw > math.pi/6):
         # Se obiene la posicion del robot ground truth
         x = gt_x + delta_dist * math.cos(gt_yaw)
         y = gt_y + delta_dist * math.sin(gt_yaw)
@@ -145,13 +148,17 @@ while True:
         delta_yaw2 = delta_yaw * delta_yaw
         for i in range(particle_num):
             del_dist = np.random.normal(delta_dist, odom_noise1 * delta_dist2 + odom_noise2 * delta_yaw2)
+            console.print("Que es lo que valor del_dist")
+            console.print(del_dist)
             del_yaw = np.random.normal(delta_yaw, odom_noise3 * delta_dist2 + odom_noise4 * delta_yaw2)
+            console.print(particles[i][0])
+            console.print(math.cos(particles[i][2]))
             x = particles[i][0] + del_dist * math.cos(particles[i][2])
             y = particles[i][1] + del_dist * math.sin(particles[i][2])
             console.print("El valor de particles y:")
             console.print(particles[i][1])
-            console.print("El valor de y:")
-            console.print(y)
+            # console.print("El valor de y:")
+            # console.print(y)
             yaw_ = particles[i][2] + del_yaw
             while yaw < -PI:
                 yaw += PI2
@@ -170,11 +177,8 @@ while True:
                 total_log_prob = 0.0
                 for j in range(len(measurements)):
                     myaw = particles[i][2] + measurements[j][1]
-                    # myaw = particles[i][2] + measurements[j]
                     mx = measurements[j][0] * math.cos(myaw) + particles[i][0]
                     my = measurements[j][0] * math.sin(myaw) + particles[i][1]
-                    # mx = measurements[j] * math.cos(myaw) + particles[i][0]
-                    # my = measurements[j] * math.sin(myaw) + particles[i][1]
                     min_dl = 0.0
                     for k in range(len(landmarks)):
                         dx = landmarks[k][0] - mx

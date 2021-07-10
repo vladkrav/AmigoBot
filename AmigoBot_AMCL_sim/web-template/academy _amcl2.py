@@ -10,13 +10,13 @@ import config
 from functools import partial
 from environment import Environment
 # Enter sequential code!
-
-
+# Definiciones
 ROBOT_DIAMETER = 5
 no_particles = 50
 no_random_particles = 5000
 type_localization = True
 show_particles = True
+
 # Se obtiene el espacio libre del mapa, para despues generar las particulas
 scene = 'scene-1'
 map_name = 'scenes/%s.png' % 'scene-1'
@@ -103,26 +103,26 @@ while True:
                 #particle_positions and particle_velocities
                 new_state[i] = new_state_p
                 new_v[i] = v
+
             mm = partial(env.measurement_model, observed_measurements=noisy_measurements)
             positions = new_state.tolist()
             p = Pool(10)
             weights = p.map(mm, positions)
             weights = np.array(weights)
             total_weights = np.sum(weights)
-            # console.print(total_weights)
             if total_weights == 0:
                 is_weight_valid = False
-                # console.print("no hay pesos")
             else:
-                # console.print("Si hay pesos")
+                console.print("Si hay pesos")
                 is_weight_valid = True
                 important_weights = weights / total_weights
+
             # En este paso se realiza el remuestreo de las particulas
             if(is_weight_valid):
                 particle_resampling_indicies = np.random.choice(new_state.shape[0], new_state.shape[0], replace=True, p=important_weights)
                 particle_resampling = new_state[particle_resampling_indicies]
                 GUI.showParticles(particle_resampling.tolist())
-                # console.print("Entra aqui")
+                console.print(particle_resampling)
             else:
                 particles_xy_indices = np.random.choice(traversable_area.shape[0], size=no_particles, replace=True)
                 particles_xy = traversable_area[particles_xy_indices]
