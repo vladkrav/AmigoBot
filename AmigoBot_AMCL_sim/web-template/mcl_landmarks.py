@@ -44,74 +44,78 @@ particles = np.array(particles).tolist()
 
 # Mostrar por el GUI las particulas generadas. Recordar transformar las medidas en metros en medidas en pixeles en .js
 GUI.showParticles(particles)
+while True:
+    # Enter iterative code!
+    distance_control = math.sqrt((HAL.getPose3d().x / 0.03 - robot_pose_x)**2 + (HAL.getPose3d().y / 0.03- robot_pose_y)**2)
+    distance_yaw_control = abs(robot_pose_x - HAL.getPose3d().yaw)
+    if(distance_control >= 1):
+        # Etapa de observacion
+        # Se obtiene en que landmark se encuentra el robot
+        min_distance = 0
+        aux_distance = 1000
+        for landmark in env_landmarks:
+            distance = math.sqrt((HAL.getPose3d().x - landmark[0]) **2 + (HAL.getPose3d().y - landmark[1])**2)
+            if (distance < aux_distance):
+                min_distance = distance
+                aux_distance = min_distance
+                current_landmark = landmark
+            else:
+                pass
+        # Se mide la diferencia que hay entre las particulas y la marca del entorno
 
-# Etapa de observacion
-# Se obtiene en que landmark se encuentra el robot
-min_distance = 0
-aux_distance = 1000
-for landmark in env_landmarks:
-    distance = math.sqrt((HAL.getPose3d().x - landmark[0]) **2 + (HAL.getPose3d().y - landmark[1])**2)
-    if (distance < aux_distance):
-        min_distance = distance
-        aux_distance = min_distance
-        current_landmark = landmark
-    else:
-        pass
-# Se mide la diferencia que hay entre las particulas y la marca del entorno
+        for particle in num_particles:
+            x = particle[0]
+            y = particle[1]
+            #Para cada particula, mirar la distancia hacia el current landmark
+            observed_dist = math.sqrt((x - current_landmark[0]) **2 + (y - current_landmark[1])**2)
+            observed_particles.append((observed_dist))
+        prob = norm.pdf(observed_particles, particles, 10)
+        print(prob)
+        for i in range(particles.shape[0]):
+            particles[i][3] = prob[i]
+        # normalizers = np.sum(prob[:-1])
+        # weights = prob[-1] / normalizers
 
-for particle in num_particles:
-    x = particle[0]
-    y = particle[1]
-    #Para cada particula, mirar la distancia hacia el current landmark
-    observed_dist = math.sqrt((x - current_landmark[0]) **2 + (y - current_landmark[1])**2)
-    observed_particles.append((observed_dist))
-prob = norm.pdf(observed_particles, particles, 10)
-print(prob)
-for i in range(particles.shape[0]):
-    particles[i][3] = prob[i]
-# normalizers = np.sum(prob[:-1])
-# weights = prob[-1] / normalizers
+        # Ahora que se tienen los pesos
+        # Se realiza el resampling
+        particle_resampling_indicies = np.random.choice(particles.shape[0], particles.shape[0], replace=True, p=prob)
+        particle_resampling = particles[particle_resampling_indicies]
+        GUI.showParticles(particle_resampling.tolist())
 
-# Ahora que se tienen los pesos
-# Se realiza el resampling
-particle_resampling_indicies = np.random.choice(particles.shape[0], particles.shape[0], replace=True, p=prob)
-particle_resampling = particles[particle_resampling_indicies]
-GUI.showParticles(particle_resampling.tolist())
+        # Se aplica el modelo de movimiento a las particulas
+        move_yaw = abs(HAL.getPose3d().yaw - robot_pose_yaw)
+        for particle in particles:
+            # Actualizar el giro para la siguiente iteracion
+            robot_pose_yaw = HAL.getPose3d().yaw
+            if(0 < HAL.getPose3d().yaw < math.pi/2):
+                alpha = HAL.getPose3d().yaw
+            elif(math.pi/2 < HAL.getPose3d().yaw < math.pi):
+                alpha = math.pi - HAL.getPose3d().yaw
+            elif(math.pi < HAL.getPose3d().yaw < 3*math.pi/2):
+                alpha = HAL.getPose3d().yaw - math.pi
+            elif(HAL.getPose3d().yaw > 3*math.pi/2):
+                alpha = 2*math.pi - HAL.getPose3d().yaw
 
-# Se aplica el modelo de movimiento a las particulas
-move_yaw = abs(HAL.getPose3d().yaw - robot_pose_yaw)
-for particle in particles:
-    # Actualizar el giro para la siguiente iteracion
-    robot_pose_yaw = HAL.getPose3d().yaw
-    if(0 < HAL.getPose3d().yaw < math.pi/2):
-        alpha = HAL.getPose3d().yaw
-    elif(math.pi/2 < HAL.getPose3d().yaw < math.pi):
-        alpha = math.pi - HAL.getPose3d().yaw
-    elif(math.pi < HAL.getPose3d().yaw < 3*math.pi/2):
-        alpha = HAL.getPose3d().yaw - math.pi
-    elif(HAL.getPose3d().yaw > 3*math.pi/2):
-        alpha = 2*math.pi - HAL.getPose3d().yaw
+            # Se calcula la distancia recorrida por el robot
+            distance = math.sqrt((HAL.getPose3d().x - robot_pose_x)**2 + (HAL.getPose3d().y - robot_pose_y)**2)
+            # Movimiento en x
+            move_x = math.cos(alpha) * distance
+            # Movimiento en y
+            move_y = math.sin(alpha) * distance
+            # Se aplica el movimiento calculado a las particulas
+            particle[i][0] = particle[i][0] + move_x
+            particle[i][1] = particle[i][1] + move_y
+            particle[i][2] = particle[i][2] + move_yaw
+        # Se estima la posicion del robot
+        for i in range(num_particles):
+            robot_x += particles[i][0] * particles[i][3]
+            robot_y += particles[i][1] * particles[i][3]
+            robot_yaw += particles[i][2] * particles[i][3]
+        GUI.showEstimatedPose((robot_x, robot_y, robot_yaw))
 
-    # Se calcula la distancia recorrida por el robot
-    distance = math.sqrt((HAL.getPose3d().x - robot_pose_x)**2 + (HAL.getPose3d().y - robot_pose_y)**2)
-    # Movimiento en x
-    move_x = math.cos(alpha) * distance
-    # Movimiento en y
-    move_y = math.sin(alpha) * distance
-    # Se aplica el movimiento calculado a las particulas
-    particle[i][0] = particle[i][0] + move_x
-    particle[i][1] = particle[i][1] + move_y
-    particle[i][2] = particle[i][2] + move_yaw
-# Se estima la posicion del robot
-for i in range(num_particles):
-    robot_x += particles[i][0] * particles[i][3]
-    robot_y += particles[i][1] * particles[i][3]
-    robot_yaw += particles[i][2] * particles[i][3]
-GUI.showEstimatedPose((robot_x, robot_y, robot_yaw))
-
-# Actualizar el giro para la siguiente iteracion
-robot_pose_yaw = HAL.getPose3d().yaw
-# Actualizar la x para la siguiente iteracion
-robot_pose_x = HAL.getPose3d().x
-# Actualizar la y para la siguiente iteracion
-robot_pose_y = HAL.getPose3d().y
+        # Actualizar el giro para la siguiente iteracion
+        robot_pose_yaw = HAL.getPose3d().yaw
+        # Actualizar la x para la siguiente iteracion
+        robot_pose_x = HAL.getPose3d().x
+        # Actualizar la y para la siguiente iteracion
+        robot_pose_y = HAL.getPose3d().y
