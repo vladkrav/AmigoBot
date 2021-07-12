@@ -4,8 +4,8 @@ var mapCanvas = document.getElementById("birds-eye"),
 	
 	
 var trail = [],
-	coords = [-1, -1];;
-
+	coords = [-1, -1];
+var resolution = 0.03;
 // Complete draw function
 function draw(pos, contorno, laser_data, sonar_sensor_point, pos_vertices, laser_global,
 	approximated_robot_pose, particles){
@@ -164,13 +164,32 @@ function drawAMCL(approximated_robot_pose, particles){
 		ctx.beginPath();
 		ctx.strokeStyle = "#000000";
 		ctx.fillStyle = "#0000FF";
-		ctx.arc(d[0], 729 - d[1], 2, 0, 2 * Math.PI);
-		// ctx.stroke();
-		// ctx.fill();
-		px1 = d[0] + 2 * Math.cos(d[2]);
-		py1 = posy - 2 * Math.sin(d[2]);
-		ctx.moveTo(d[0],d[1])
-		ctx.lineTo(px1,py1)
+		ctx.arc(d[0] / resolution , 729 - d[1] / resolution, 2, 0, 2 * Math.PI);
+		
+		// alert(`d[2]=${d[2]} particles=${particles}`);
+		if(0 <= d[2] < Math.PI/2){
+			alpha = d[2]
+			px1 = d[0] / resolution + 5 * Math.cos(alpha);
+			py1 = d[1] / resolution + 5 * Math.sin(alpha);
+		}	
+		else if(Math.PI/2 <= d[2] < Math.PI){
+			alpha = Math.PI - d[2]
+			px1 = d[0] / resolution - 5 * Math.cos(alpha);
+			py1 = d[1] / resolution + 5 * Math.sin(alpha);
+		}
+		else if(Math.PI <= d[2] < 3 * Math.PI / 2){
+			alpha = d[2] - Math.PI
+			px1 = d[0] / resolution - 5 * Math.cos(alpha);
+			py1 = d[1] / resolution - 5 * Math.sin(alpha);
+		}
+		else if(d[2] >= 3 * Math.PI/2){
+			alpha = 2 * Math.PI - d[2]
+			px1 = d[0] / resolution + 5 * Math.cos(alpha);
+			py1 = d[1] / resolution - 5 * Math.sin(alpha);
+		}
+		// alert(`d[0]=${d[0]} d[1]=${d[1]}`);
+		ctx.moveTo(d[0] / resolution, 729 - (d[1] / resolution));
+		ctx.lineTo(px1, 729 - py1);
 		ctx.stroke();
 		ctx.fill();
 		ctx.closePath();
@@ -178,7 +197,30 @@ function drawAMCL(approximated_robot_pose, particles){
 	ctx.beginPath();
 	ctx.strokeStyle = "#000000";
 	ctx.fillStyle = "#0000FF";
-	ctx.arc(approximated_robot_pose[0], 729 - approximated_robot_pose[1], 8, 0, 2 * Math.PI);
+	ctx.arc(approximated_robot_pose[0] / resolution, 729 - approximated_robot_pose[1] / resolution, 8, 0, 2 * Math.PI);
+	
+	if(0 <= approximated_robot_pose[2] < Math.PI/2){
+		alpha = approximated_robot_pose[2]
+		px1 = approximated_robot_pose[0] / resolution + 20 * Math.cos(alpha);
+		py1 = approximated_robot_pose[1] / resolution + 20 * Math.sin(alpha);
+	}	
+	else if(Math.PI/2 <= approximated_robot_pose[2] < Math.PI){
+		alpha = Math.PI - approximated_robot_pose[2]
+		px1 = approximated_robot_pose[0] / resolution - 20 * Math.cos(alpha);
+		py1 = approximated_robot_pose[1] / resolution + 20 * Math.sin(alpha);
+	}
+	else if(Math.PI <= approximated_robot_pose[2] < 3 * Math.PI / 2){
+		alpha = approximated_robot_pose[2] - Math.PI
+		px1 = approximated_robot_pose[0] / resolution - 20 * Math.cos(alpha);
+		py1 = approximated_robot_pose[1] / resolution - 20 * Math.sin(alpha);
+	}
+	else if(approximated_robot_pose[2] >= 3 * Math.PI/2){
+		alpha = 2 * Math.PI - approximated_robot_pose[2]
+		px1 = approximated_robot_pose[0] / resolution + 20 * Math.cos(alpha);
+		py1 = approximated_robot_pose[1] / resolution - 20 * Math.sin(alpha);
+	}
+	ctx.moveTo(approximated_robot_pose[0] / resolution, 729 - approximated_robot_pose[1] / resolution)
+	ctx.lineTo(px1, 729 - py1)
 	ctx.stroke();
 	ctx.fill();
 	ctx.closePath();

@@ -139,4 +139,4 @@ while True:
             angle_diffs = np.min(angle_diffs, axis=1)
             angle_differences.append((np.mean(angle_diffs), np.std(angle_diffs)))
             approximated_robot_x, approximated_robot_y = np.mean(particle_resampling[:, 0]), np.mean(particle_resampling[:, 1])
-            GUI.showEstimatedPose((approximated_robot_x, approximated_robot_y))
+            GUI.showEstimatedPose((approximated_robot_x, approximated_robot_y, math.pi/2))
