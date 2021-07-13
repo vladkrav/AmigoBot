@@ -87,9 +87,11 @@ while True:
             #Para cada particula, mirar la distancia hacia el current landmark
             observed_dist = math.sqrt((x - current_landmark[0]) **2 + (y - current_landmark[1])**2)
             observed_particles.append((observed_dist))
-        prob = norm.pdf(observed_particles, np.array(particles).shape[0], 10)
+        # prob = norm.pdf(observed_particles, np.array(particles).shape[0], 10)
+        prob = norm.pdf(observed_particles, np.mean(observed_particles), 10)
         console.print(prob)
         for i in range(np.array(particles).shape[0]):
+            console.print(i)
             particles[i][3] = prob[i]
         # normalizers = np.sum(prob[:-1])
         # weights = prob[-1] / normalizers
